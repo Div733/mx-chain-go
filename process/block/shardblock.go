@@ -341,10 +341,7 @@ func (sp *shardProcessor) ProcessBlock(
 		}
 	}()
 
-	mbIndex, err := sp.getIndexOfFirstMiniBlockToBeExecuted(header)
-	if err != nil {
-		return err
-	}
+	mbIndex := sp.getIndexOfFirstMiniBlockToBeExecuted(header)
 	miniBlocks := body.MiniBlocks[mbIndex:]
 
 	startTime := time.Now()

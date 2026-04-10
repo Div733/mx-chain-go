@@ -153,7 +153,7 @@ func (imh *InterceptedMetaHeader) integrity() error {
 		return err
 	}
 
-	return checkMiniBlocksHeaders(imh.hdr.GetMiniBlockHeaderHandlers(), imh.shardCoordinator)
+	return nil
 }
 
 // IsForCurrentShard always returns true
