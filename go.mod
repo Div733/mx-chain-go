@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/beevik/ntp v1.3.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/gin-contrib/cors v1.4.0
+	github.com/gin-contrib/cors v1.6.0
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gizak/termui/v3 v3.1.0
@@ -23,7 +23,7 @@ require (
 	github.com/multiversx/mx-chain-logger-go v1.1.0
 	github.com/multiversx/mx-chain-scenario-go v1.6.0
 	github.com/multiversx/mx-chain-storage-go v1.1.0
-	github.com/multiversx/mx-chain-vm-common-go v1.6.0
+	github.com/multiversx/mx-chain-vm-common-go v1.6.1-0.20251127112501-0b5f28e33b2e
 	github.com/multiversx/mx-chain-vm-go v1.5.43
 	github.com/multiversx/mx-chain-vm-v1_2-go v1.2.69
 	github.com/multiversx/mx-chain-vm-v1_3-go v1.3.70
@@ -208,3 +208,11 @@ require (
 )
 
 replace github.com/gogo/protobuf => github.com/multiversx/protobuf v1.3.2
+
+replace github.com/multiversx/mx-chain-vm-common-go => /home/divesh/Desktop/RWA/FINAL/RWA/mx-chain-vm-common-go
+
+replace github.com/multiversx/mx-chain-es-indexer-go => /home/divesh/Desktop/RWA/FINAL/RWA/mx-chain-es-indexer-go
+
+replace github.com/multiversx/mx-chain-scenario-go => /home/divesh/Desktop/RWA/FINAL/RWA/mx-chain-scenario-go
+
+replace github.com/multiversx/mx-chain-vm-go => /home/divesh/Desktop/RWA/FINAL/RWA/mx-chain-vm-go

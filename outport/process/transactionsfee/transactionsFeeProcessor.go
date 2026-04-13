@@ -131,7 +131,7 @@ func (tep *transactionsFeeProcessor) prepareNormalTxs(transactionsAndScrs *trans
 		isRelayed := tep.isRelayedTxV1V2(txWithResult, epoch)
 		isFeeFixActive := tep.enableEpochsHandler.IsFlagEnabledInEpoch(common.FixRelayedBaseCostFlag, epoch)
 		isRelayedBeforeFix := isRelayed && !isFeeFixActive
-		if isRelayedBeforeFix || tep.isESDTOperationWithSCCall(txHandler) {
+		if isRelayedBeforeFix || tep.isESDTOperationWithSCCall(txHandler, epoch) {
 			feeInfo.SetGasUsed(txWithResult.GetTxHandler().GetGasLimit())
 			feeInfo.SetFee(initialPaidFee)
 		}
@@ -259,7 +259,7 @@ func (tep *transactionsFeeProcessor) prepareTxWithResultsBasedOnLogs(
 		return
 	}
 
-	res := tep.dataFieldParser.Parse(tx.GetData(), tx.GetSndAddr(), tx.GetRcvAddr(), tep.shardCoordinator.NumberOfShards())
+	res := tep.dataFieldParser.Parse(tx.GetData(), tx.GetSndAddr(), tx.GetRcvAddr(), tep.shardCoordinator.NumberOfShards(), epoch)
 	if check.IfNilReflect(txWithResults.log) || (res.Function == "" && res.Operation == datafield.OperationTransfer) {
 		return
 	}
