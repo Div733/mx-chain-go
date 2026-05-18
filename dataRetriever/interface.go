@@ -6,7 +6,9 @@ import (
 	"github.com/multiversx/mx-chain-core-go/core"
 	"github.com/multiversx/mx-chain-core-go/core/counting"
 	"github.com/multiversx/mx-chain-core-go/data"
+	"github.com/multiversx/mx-chain-core-go/data/block"
 
+	"github.com/multiversx/mx-chain-go/common"
 	"github.com/multiversx/mx-chain-go/p2p"
 	"github.com/multiversx/mx-chain-go/state"
 	"github.com/multiversx/mx-chain-go/storage"
@@ -150,9 +152,14 @@ type TopicHandler interface {
 	RegisterMessageProcessor(topic string, identifier string, handler p2p.MessageProcessor) error
 }
 
-// IntRandomizer interface provides functionality over generating integer numbers
+// IntRandomizer interface provides functionality over generating integer numbers.
+//
+// ISSUE-045 closure: see the equivalent interface in
+// mx-chain-core-go/core/closing/interface.go for the full rationale.
+// Short version: `Intn(n int) (int, error)` lets callers react to
+// entropy-source failures rather than crashing.
 type IntRandomizer interface {
-	Intn(n int) int
+	Intn(n int) (int, error)
 	IsInterfaceNil() bool
 }
 
@@ -182,6 +189,23 @@ type ShardedDataCacherNotifier interface {
 	GetCounts() counting.CountsWithSize
 	Keys() [][]byte
 	IsInterfaceNil() bool
+	CleanupSelfShardTxCache(accountsProvider common.AccountNonceProvider, randomness uint64, maxNum int, cleanupLoopMaximumDuration time.Duration)
+	GetNumTrackedBlocks() uint64
+	GetNumTrackedAccounts() uint64
+	OnExecutedBlock(blockHeader data.HeaderHandler, rootHash []byte) error
+	OnProposedBlock(
+		blockHash []byte,
+		blockBody *block.Body,
+		blockHeader data.HeaderHandler,
+		accountsProvider common.AccountNonceAndBalanceProvider,
+		latestExecutedHash []byte,
+	) error
+	OnBackfilledBlock(
+		blockHash []byte,
+		blockBody *block.Body,
+		blockHeader data.HeaderHandler,
+	) error
+	ResetTracker()
 }
 
 // ShardIdHashMap represents a map for shardId and hash
@@ -242,6 +266,9 @@ type PoolsHolder interface {
 	Heartbeats() storage.Cacher
 	ValidatorsInfo() ShardedDataCacherNotifier
 	Proofs() ProofsPool
+	ExecutedMiniBlocks() storage.Cacher
+	PostProcessTransactions() storage.Cacher
+	DirectSentTransactions() storage.Cacher
 	Close() error
 	IsInterfaceNil() bool
 }

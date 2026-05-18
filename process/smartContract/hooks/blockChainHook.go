@@ -3,6 +3,8 @@ package hooks
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"path"
@@ -19,6 +21,10 @@ import (
 	"github.com/multiversx/mx-chain-core-go/data/typeConverters"
 	"github.com/multiversx/mx-chain-core-go/hashing/keccak"
 	"github.com/multiversx/mx-chain-core-go/marshal"
+	logger "github.com/multiversx/mx-chain-logger-go"
+	vmcommon "github.com/multiversx/mx-chain-vm-common-go"
+	"github.com/multiversx/mx-chain-vm-common-go/parsers"
+
 	"github.com/multiversx/mx-chain-go/common"
 	"github.com/multiversx/mx-chain-go/config"
 	"github.com/multiversx/mx-chain-go/dataRetriever"
@@ -30,9 +36,6 @@ import (
 	"github.com/multiversx/mx-chain-go/storage"
 	"github.com/multiversx/mx-chain-go/storage/factory"
 	"github.com/multiversx/mx-chain-go/storage/storageunit"
-	logger "github.com/multiversx/mx-chain-logger-go"
-	vmcommon "github.com/multiversx/mx-chain-vm-common-go"
-	"github.com/multiversx/mx-chain-vm-common-go/parsers"
 )
 
 var _ process.BlockChainHookHandler = (*BlockChainHookImpl)(nil)
@@ -41,6 +44,13 @@ var log = logger.GetOrCreate("process/smartcontract/blockchainhook")
 
 const defaultCompiledSCPath = "compiledSCStorage"
 const executeDurationAlarmThreshold = time.Duration(50) * time.Millisecond
+
+const (
+	drwaNativeGovernanceQueryConfig uint32 = iota
+	drwaNativeGovernanceQueryProposal
+	drwaNativeGovernanceQueryAuditRecord
+	drwaNativeGovernanceQueryRecoveryLastBlock
+)
 
 // ArgBlockChainHook represents the arguments structure for the blockchain hook
 type ArgBlockChainHook struct {
@@ -66,7 +76,7 @@ type ArgBlockChainHook struct {
 	Counter                  BlockChainHookCounter
 	MissingTrieNodesNotifier common.MissingTrieNodesNotifier
 	EpochStartTrigger        EpochStartTriggerHandler
-	RoundHandler             RoundHandler // TODO: @laurci - this needs to be replaced when changing the round duration
+	RoundHandler             RoundHandler
 }
 
 // BlockChainHookImpl is a wrapper over AccountsAdapter that satisfy vmcommon.BlockchainHook interface
@@ -85,7 +95,7 @@ type BlockChainHookImpl struct {
 	enableEpochsHandler   common.EnableEpochsHandler
 	counter               BlockChainHookCounter
 	epochStartTrigger     EpochStartTriggerHandler
-	roundHandler          RoundHandler // TODO: @laurci - this needs to be replaced when changing the round duration
+	roundHandler          RoundHandler
 
 	mutCurrentHdr sync.RWMutex
 	currentHdr    data.HeaderHandler
@@ -156,18 +166,31 @@ func NewBlockChainHookImpl(
 }
 
 func createMapActivationEpochs(enableEpochs *config.EnableEpochs) map[uint32]struct{} {
+	mapActivationEpoch, skippedFields := collectActivationEpochs(enableEpochs)
+	for _, fieldName := range skippedFields {
+		log.Warn("createMapActivationEpochs: skipping non-uint32 enable epoch field", "field", fieldName)
+	}
+
+	return mapActivationEpoch
+}
+
+func collectActivationEpochs(enableEpochs *config.EnableEpochs) (map[uint32]struct{}, []string) {
 	mapActivationEpoch := make(map[uint32]struct{})
+	skippedFields := make([]string, 0)
 
 	reflectVal := reflect.ValueOf(enableEpochs).Elem()
+	reflectType := reflectVal.Type()
 	for i := 0; i < reflectVal.NumField(); i++ {
 		f := reflectVal.Field(i)
 		epoch, ok := f.Interface().(uint32)
 		if !ok {
+			skippedFields = append(skippedFields, reflectType.Field(i).Name)
 			continue
 		}
 		mapActivationEpoch[epoch] = struct{}{}
 	}
-	return mapActivationEpoch
+
+	return mapActivationEpoch, skippedFields
 }
 
 func checkForNil(args ArgBlockChainHook) error {
@@ -302,12 +325,14 @@ func (bh *BlockChainHookImpl) GetStorageData(accountAddress []byte, index []byte
 		messages = append(messages, err)
 
 		bh.syncIfMissingDataTrieNode(err)
+		if errors.Is(err, state.ErrNilTrie) {
+			log.Trace("GetStorageData treating nil trie as empty storage", messages...)
+			return make([]byte, 0), 0, nil
+		}
 	}
 	log.Trace("GetStorageData ", messages...)
 
-	// returning nil here ensures backwards compatibility as the error wasn't taken into account by the previous versions
-	// of the vm. Now, the VM take into account this error so the processMaxReadsCounters call can stop the execution of the contract
-	return value, trieDepth, nil
+	return value, trieDepth, err
 }
 
 func (bh *BlockChainHookImpl) syncIfMissingDataTrieNode(err error) {
@@ -338,16 +363,16 @@ func (bh *BlockChainHookImpl) processMaxReadsCounters() error {
 func (bh *BlockChainHookImpl) GetBlockhash(nonce uint64) ([]byte, error) {
 	defer stopMeasure(startMeasure("GetBlockhash"))
 
-	hdr := bh.blockChain.GetCurrentBlockHeader()
-
-	if check.IfNil(hdr) {
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
 		return nil, process.ErrNilBlockHeader
 	}
-	if nonce > hdr.GetNonce() {
+	if nonce > lastExecHdr.GetNonce() {
 		return nil, process.ErrInvalidNonceRequest
 	}
-	if nonce == hdr.GetNonce() {
-		return bh.blockChain.GetCurrentBlockHeaderHash(), nil
+	if nonce == lastExecHdr.GetNonce() {
+		_, lastExecHash, _ := bh.blockChain.GetLastExecutedBlockInfo()
+		return lastExecHash, nil
 	}
 	if bh.enableEpochsHandler.IsFlagEnabled(common.DoNotReturnOldBlockInBlockchainHookFlag) {
 		return nil, process.ErrInvalidNonceRequest
@@ -364,64 +389,77 @@ func (bh *BlockChainHookImpl) GetBlockhash(nonce uint64) ([]byte, error) {
 		return nil, err
 	}
 
-	if header.GetEpoch() != hdr.GetEpoch() {
+	if header.GetEpoch() != lastExecHdr.GetEpoch() {
 		return nil, process.ErrInvalidBlockRequestOldEpoch
 	}
 
 	return hash, nil
 }
 
-// LastNonce returns the nonce from the last committed block
+// LastNonce returns the nonce from the last executed block
 func (bh *BlockChainHookImpl) LastNonce() uint64 {
-	if !check.IfNil(bh.blockChain.GetCurrentBlockHeader()) {
-		return bh.blockChain.GetCurrentBlockHeader().GetNonce()
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
+		return 0
 	}
-	return 0
+
+	return lastExecHdr.GetNonce()
 }
 
-// LastRound returns the round from the last committed block
+// LastRound returns the round from the last executed block
 func (bh *BlockChainHookImpl) LastRound() uint64 {
-	if !check.IfNil(bh.blockChain.GetCurrentBlockHeader()) {
-		return bh.blockChain.GetCurrentBlockHeader().GetRound()
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
+		return 0
 	}
-	return 0
+
+	return lastExecHdr.GetRound()
 }
 
-// LastTimeStamp returns the timeStamp from the last committed block
+// LastTimeStamp returns the timeStamp from the last executed block
 func (bh *BlockChainHookImpl) LastTimeStamp() uint64 {
-	if !check.IfNil(bh.blockChain.GetCurrentBlockHeader()) {
-		return bh.blockChain.GetCurrentBlockHeader().GetTimeStamp()
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
+		return 0
 	}
-	return 0
+
+	return lastExecHdr.GetTimeStamp()
 }
 
-// LastTimeStampMs returns the timeStamp in milliseconds from the last committed block
+// LastTimeStampMs returns the timeStamp in milliseconds from the last executed block
 func (bh *BlockChainHookImpl) LastTimeStampMs() uint64 {
-	if !check.IfNil(bh.blockChain.GetCurrentBlockHeader()) {
-		return common.ConvertTimeStampSecToMs(bh.blockChain.GetCurrentBlockHeader().GetTimeStamp())
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
+		return 0
 	}
-	return 0
+
+	_, timestampMs, _ := common.GetHeaderTimestamps(lastExecHdr, bh.enableEpochsHandler)
+
+	return timestampMs
 }
 
-// LastRandomSeed returns the random seed from the last committed block
+// LastRandomSeed returns the random seed from the last executed block
 func (bh *BlockChainHookImpl) LastRandomSeed() []byte {
-	if !check.IfNil(bh.blockChain.GetCurrentBlockHeader()) {
-		return bh.blockChain.GetCurrentBlockHeader().GetRandSeed()
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
+		return make([]byte, 0)
 	}
-	return make([]byte, 0)
+
+	return lastExecHdr.GetRandSeed()
 }
 
-// LastEpoch returns the epoch from the last committed block
+// LastEpoch returns the epoch from the last executed block
 func (bh *BlockChainHookImpl) LastEpoch() uint32 {
-	if !check.IfNil(bh.blockChain.GetCurrentBlockHeader()) {
-		return bh.blockChain.GetCurrentBlockHeader().GetEpoch()
+	lastExecHdr := bh.blockChain.GetLastExecutedBlockHeader()
+	if check.IfNil(lastExecHdr) {
+		return 0
 	}
-	return 0
+
+	return lastExecHdr.GetEpoch()
 }
 
 // RoundTime returns the duration of a round
 func (bh *BlockChainHookImpl) RoundTime() uint64 {
-	// TODO: @laurci - this needs to be replaced when changing the round duration
 	roundDuration := bh.roundHandler.TimeDuration()
 
 	return uint64(roundDuration.Milliseconds())
@@ -432,7 +470,8 @@ func (bh *BlockChainHookImpl) EpochStartBlockTimeStampMs() uint64 {
 	bh.mutEpochStartHdr.RLock()
 	defer bh.mutEpochStartHdr.RUnlock()
 
-	timestampMs := common.ConvertTimeStampSecToMs(bh.epochStartHdr.GetTimeStamp())
+	_, timestampMs, _ := common.GetHeaderTimestamps(bh.epochStartHdr, bh.enableEpochsHandler)
+
 	return timestampMs
 }
 
@@ -454,12 +493,17 @@ func (bh *BlockChainHookImpl) EpochStartBlockRound() uint64 {
 
 // GetStateRootHash returns the state root hash from the last committed block
 func (bh *BlockChainHookImpl) GetStateRootHash() []byte {
-	rootHash := bh.blockChain.GetCurrentBlockRootHash()
+	rootHash := bh.getCurrentRootHash()
 	if len(rootHash) > 0 {
 		return rootHash
 	}
 
 	return make([]byte, 0)
+}
+
+func (bh *BlockChainHookImpl) getCurrentRootHash() []byte {
+	_, _, lastExecutedRootHash := bh.blockChain.GetLastExecutedBlockInfo()
+	return lastExecutedRootHash
 }
 
 // CurrentNonce returns the nonce from the current block
@@ -478,6 +522,177 @@ func (bh *BlockChainHookImpl) CurrentRound() uint64 {
 	return bh.currentHdr.GetRound()
 }
 
+// ApplyDRWASyncEnvelopeBytes applies a DRWA sync batch atomically from an encoded envelope payload.
+func (bh *BlockChainHookImpl) ApplyDRWASyncEnvelopeBytes(payload []byte, callerAddress []byte) error {
+	envelope, err := decodeDRWASyncEnvelope(payload)
+	if err != nil {
+		return err
+	}
+	if len(callerAddress) != drwaAuthorizedCallerAddressLen {
+		recordDRWAMetric(drwaMetricAuthorizedCallerMalformed)
+		return errors.New(drwaSyncRejectUnauthorizedCaller)
+	}
+	if bytes.Equal(callerAddress, make([]byte, drwaAuthorizedCallerAddressLen)) {
+		recordDRWAMetric(drwaMetricAuthorizedCallerMalformed)
+		return errors.New(drwaSyncRejectUnauthorizedCaller)
+	}
+
+	adapter, err := newDRWAHookStateAdapter(bh.accounts)
+	if err != nil {
+		// Operator-error signal (e.g. accounts handler not wired)
+		// surfaces verbatim. Tests rely on ErrNilDRWAAccountsAdapter
+		// reaching the caller; the allowlist gate below runs only
+		// once the adapter is healthy.
+		return err
+	}
+	adapter.nonceProvider = bh
+
+	// Allowlist gate: the caller must match one of the provisioned
+	// DRWA authorized addresses for at least one of the role domains
+	// (auth admin, policy registry, asset manager, identity registry,
+	// attestation, recovery admin). Previously this function only
+	// checked length and non-zero, fully delegating identity to
+	// upstream callers — a single missed gate anywhere upstream would
+	// allow arbitrary callers to mutate DRWA compliance state. The
+	// IsAuthorizedDRWASyncCaller helper enforces the actual allowlist
+	// against chain state and runs AFTER adapter creation so the
+	// operator-error code path (ErrNilDRWAAccountsAdapter) is
+	// preserved.
+	if !bh.IsAuthorizedDRWASyncCaller(callerAddress) {
+		recordDRWAMetric(drwaMetricAuthorizedCallerMalformed)
+		return errors.New(drwaSyncRejectUnauthorizedCaller)
+	}
+
+	_, err = applyDRWASyncEnvelope(
+		adapter,
+		envelope,
+		drwaSyncMaxOperations,
+		callerAddress,
+	)
+
+	return err
+}
+
+// GetDRWAGovernanceConfig returns the native DRWA governance configuration stored for a token.
+func (bh *BlockChainHookImpl) GetDRWAGovernanceConfig(tokenID string) (*DRWAGovernanceConfig, error) {
+	store, err := newDRWAGovernanceTrieStore(bh.accounts)
+	if err != nil {
+		return nil, err
+	}
+
+	return store.GetGovernanceConfig(tokenID)
+}
+
+// GetDRWAGovernanceProposal returns a native DRWA recovery-governance proposal by its 32-byte ID.
+func (bh *BlockChainHookImpl) GetDRWAGovernanceProposal(proposalID []byte) (*DRWAGovernanceProposal, error) {
+	var proposalKey [32]byte
+	if len(proposalID) != len(proposalKey) {
+		return nil, errors.New("DRWA governance proposal ID must be 32 bytes")
+	}
+	copy(proposalKey[:], proposalID)
+
+	store, err := newDRWAGovernanceTrieStore(bh.accounts)
+	if err != nil {
+		return nil, err
+	}
+
+	return store.GetProposal(proposalKey)
+}
+
+// GetDRWAGovernanceAuditRecord returns the compact native DRWA governance audit record for an executed proposal.
+func (bh *BlockChainHookImpl) GetDRWAGovernanceAuditRecord(proposalID []byte) (*DRWAGovernanceAuditRecord, error) {
+	var proposalKey [32]byte
+	if len(proposalID) != len(proposalKey) {
+		return nil, errors.New("DRWA governance proposal ID must be 32 bytes")
+	}
+	copy(proposalKey[:], proposalID)
+
+	store, err := newDRWAGovernanceTrieStore(bh.accounts)
+	if err != nil {
+		return nil, err
+	}
+
+	return store.GetAuditRecord(proposalKey)
+}
+
+// GetDRWARecoveryLastBlock returns the last block nonce recorded for native recovery_admin writes on a token.
+func (bh *BlockChainHookImpl) GetDRWARecoveryLastBlock(tokenID string) (uint64, error) {
+	adapter, err := newDRWAHookStateAdapter(bh.accounts)
+	if err != nil {
+		return 0, err
+	}
+
+	return adapter.GetRecoveryLastBlock(tokenID)
+}
+
+// QueryDRWANativeGovernance exposes compact native DRWA governance reads to VM hooks.
+func (bh *BlockChainHookImpl) QueryDRWANativeGovernance(queryType uint32, key []byte) ([]byte, error) {
+	switch queryType {
+	case drwaNativeGovernanceQueryConfig:
+		config, err := bh.GetDRWAGovernanceConfig(string(key))
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(config)
+	case drwaNativeGovernanceQueryProposal:
+		proposal, err := bh.GetDRWAGovernanceProposal(key)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(proposal)
+	case drwaNativeGovernanceQueryAuditRecord:
+		auditRecord, err := bh.GetDRWAGovernanceAuditRecord(key)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(auditRecord)
+	case drwaNativeGovernanceQueryRecoveryLastBlock:
+		lastBlock, err := bh.GetDRWARecoveryLastBlock(string(key))
+		if err != nil {
+			return nil, err
+		}
+		encoded := make([]byte, 8)
+		binary.BigEndian.PutUint64(encoded, lastBlock)
+		return encoded, nil
+	default:
+		return nil, errors.New("unknown DRWA native governance query type")
+	}
+}
+
+// IsAuthorizedDRWASyncCaller returns true when the address matches a provisioned DRWA authorized caller.
+func (bh *BlockChainHookImpl) IsAuthorizedDRWASyncCaller(callerAddress []byte) bool {
+	if len(callerAddress) != drwaAuthorizedCallerAddressLen {
+		return false
+	}
+
+	adapter, err := newDRWAHookStateAdapter(bh.accounts)
+	if err != nil {
+		return false
+	}
+
+	for _, domain := range []string{
+		drwaSyncCallerAuthAdmin,
+		drwaSyncCallerPolicyRegistry,
+		drwaSyncCallerAssetManager,
+		drwaSyncCallerIdentityRegistry,
+		drwaSyncCallerAttestation,
+		drwaSyncCallerRecoveryAdmin,
+	} {
+		expectedAddress, readErr := adapter.GetAuthorizedCallerAddress(domain)
+		if readErr != nil {
+			return false
+		}
+		if len(expectedAddress) != drwaAuthorizedCallerAddressLen {
+			continue
+		}
+		if bytes.Equal(expectedAddress, callerAddress) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // CurrentTimeStamp return the timestamp from the current block
 func (bh *BlockChainHookImpl) CurrentTimeStamp() uint64 {
 	bh.mutCurrentHdr.RLock()
@@ -491,7 +706,9 @@ func (bh *BlockChainHookImpl) CurrentTimeStampMs() uint64 {
 	bh.mutCurrentHdr.RLock()
 	defer bh.mutCurrentHdr.RUnlock()
 
-	return common.ConvertTimeStampSecToMs(bh.currentHdr.GetTimeStamp())
+	_, timestampMs, _ := common.GetHeaderTimestamps(bh.currentHdr, bh.enableEpochsHandler)
+
+	return timestampMs
 }
 
 // CurrentRandomSeed returns the random seed from the current header
@@ -723,7 +940,7 @@ func (bh *BlockChainHookImpl) IsBuiltinFunctionName(functionName string) bool {
 // GetAllState returns the underlying state of a given account
 // TODO remove this func completely
 func (bh *BlockChainHookImpl) GetAllState(_ []byte) (map[string][]byte, error) {
-	return nil, nil
+	return nil, ErrNotImplemented
 }
 
 // GetESDTToken returns the unmarshalled esdt data for the given key

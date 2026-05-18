@@ -5,6 +5,7 @@ package process
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"math"
 	"math/big"
@@ -13,6 +14,11 @@ import (
 	"github.com/multiversx/mx-chain-core-go/core"
 	"github.com/multiversx/mx-chain-core-go/data"
 	"github.com/multiversx/mx-chain-core-go/data/block"
+	vmcommon "github.com/multiversx/mx-chain-vm-common-go"
+	wasmConfig "github.com/multiversx/mx-chain-vm-go/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/multiversx/mx-chain-go/common"
 	"github.com/multiversx/mx-chain-go/config"
 	"github.com/multiversx/mx-chain-go/dataRetriever"
@@ -20,6 +26,7 @@ import (
 	"github.com/multiversx/mx-chain-go/genesis/mock"
 	"github.com/multiversx/mx-chain-go/genesis/parsing"
 	"github.com/multiversx/mx-chain-go/process"
+	"github.com/multiversx/mx-chain-go/process/smartContract/hooks"
 	"github.com/multiversx/mx-chain-go/sharding"
 	"github.com/multiversx/mx-chain-go/sharding/nodesCoordinator"
 	"github.com/multiversx/mx-chain-go/state"
@@ -39,12 +46,14 @@ import (
 	"github.com/multiversx/mx-chain-go/trie"
 	"github.com/multiversx/mx-chain-go/update"
 	updateMock "github.com/multiversx/mx-chain-go/update/mock"
+	"github.com/multiversx/mx-chain-go/vm"
 	"github.com/multiversx/mx-chain-go/vm/systemSmartContracts/defaults"
-	vmcommon "github.com/multiversx/mx-chain-vm-common-go"
-	wasmConfig "github.com/multiversx/mx-chain-vm-go/config"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
+
+type drwaAuthorizedCallerRecordForTest struct {
+	Version uint64 `json:"version"`
+	Address []byte `json:"address"`
+}
 
 var nodePrice = big.NewInt(5000)
 
@@ -148,6 +157,7 @@ func createMockArgument(
 				MinStepValue:                         "10",
 				MinStakeValue:                        "1",
 				UnBondPeriod:                         1,
+				UnBondPeriodSupernova:                2,
 				NumRoundsWithoutBleed:                1,
 				MaximumPercentageToBleed:             1,
 				BleedPercentagePerRound:              1,
@@ -184,14 +194,25 @@ func createMockArgument(
 				StakeLimitsEnableEpoch:            10,
 			},
 		},
+		FeeSettings: config.FeeSettings{
+			BlockCapacityOverestimationFactor: 200,
+			PercentDecreaseLimitsStep:         10,
+		},
 		RoundConfig:             testscommon.GetDefaultRoundsConfig(),
 		HeaderVersionConfigs:    testscommon.GetDefaultHeaderVersionConfig(),
 		HistoryRepository:       &dblookupext.HistoryRepositoryStub{},
 		TxExecutionOrderHandler: &commonMocks.TxExecutionOrderHandlerStub{},
 		versionedHeaderFactory: &testscommon.VersionedHeaderFactoryStub{
-			CreateCalled: func(epoch uint32) data.HeaderHandler {
+			CreateCalled: func(epoch uint32, _ uint64) data.HeaderHandler {
 				return &block.Header{}
 			},
+		},
+		TxCacheSelectionConfig: config.TxCacheSelectionConfig{
+			SelectionGasBandwidthIncreasePercent:          400,
+			SelectionGasBandwidthIncreaseScheduledPercent: 260,
+			SelectionGasRequested:                         10_000_000_000,
+			SelectionMaxNumTxs:                            30000,
+			SelectionLoopDurationCheckInterval:            10,
 		},
 	}
 
@@ -218,6 +239,7 @@ func createMockArgument(
 		&enableEpochsHandlerMock.EnableEpochsHandlerStub{},
 	)
 	require.Nil(t, err)
+	arg.AccountsProposal = arg.Accounts
 
 	arg.ValidatorAccounts = &stateMock.AccountsStub{
 		RootHashCalled: func() ([]byte, error) {
@@ -468,6 +490,78 @@ func TestNewGenesisBlockCreator(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, gbc)
 	})
+}
+
+func TestSetupDRWAAuthorizedCallers_DisabledDoesNothing(t *testing.T) {
+	arg := createMockArgument(t, "testdata/genesisTest1.json", &mock.InitialNodesHandlerStub{}, big.NewInt(22000))
+
+	err := setupDRWAAuthorizedCallers(arg)
+	require.NoError(t, err)
+}
+
+func TestSetupDRWAAuthorizedCallers_InvalidKeyManagementModel(t *testing.T) {
+	arg := createMockArgument(t, "testdata/genesisTest1.json", &mock.InitialNodesHandlerStub{}, big.NewInt(22000))
+	arg.DRWAConfig = config.DRWAConfig{
+		Enabled:            true,
+		KeyManagementModel: "single_key",
+	}
+
+	err := setupDRWAAuthorizedCallers(arg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "invalid DRWA key management model")
+}
+
+func TestSetupDRWAAuthorizedCallers_MissingRequiredDomain(t *testing.T) {
+	arg := createMockArgument(t, "testdata/genesisTest1.json", &mock.InitialNodesHandlerStub{}, big.NewInt(22000))
+	arg.DRWAConfig = config.DRWAConfig{
+		Enabled:            true,
+		KeyManagementModel: drwaKeyManagementModelMultisig3of5Contract,
+		AuthorizedCallers: config.DRWAAuthorizedCallersConfig{
+			PolicyRegistry:   "0x1111111111111111111111111111111111111111111111111111111111111111",
+			AssetManager:     "0x2222222222222222222222222222222222222222222222222222222222222222",
+			IdentityRegistry: "0x3333333333333333333333333333333333333333333333333333333333333333",
+			Attestation:      "0x4444444444444444444444444444444444444444444444444444444444444444",
+			RecoveryAdmin:    "0x5555555555555555555555555555555555555555555555555555555555555555",
+		},
+	}
+
+	err := setupDRWAAuthorizedCallers(arg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "missing DRWA authorized caller for domain auth_admin")
+}
+
+func TestSetupDRWAAuthorizedCallers_ProvisionedToSystemAccount(t *testing.T) {
+	arg := createMockArgument(t, "testdata/genesisTest1.json", &mock.InitialNodesHandlerStub{}, big.NewInt(22000))
+	arg.DRWAConfig = config.DRWAConfig{
+		Enabled:            true,
+		KeyManagementModel: drwaKeyManagementModelMultisig3of5Contract,
+		AuthorizedCallers: config.DRWAAuthorizedCallersConfig{
+			AuthAdmin:        "0x1111111111111111111111111111111111111111111111111111111111111111",
+			PolicyRegistry:   "0x2222222222222222222222222222222222222222222222222222222222222222",
+			AssetManager:     "0x3333333333333333333333333333333333333333333333333333333333333333",
+			IdentityRegistry: "0x4444444444444444444444444444444444444444444444444444444444444444",
+			Attestation:      "0x5555555555555555555555555555555555555555555555555555555555555555",
+			RecoveryAdmin:    "0x6666666666666666666666666666666666666666666666666666666666666666",
+		},
+	}
+
+	err := setupDRWAAuthorizedCallers(arg)
+	require.NoError(t, err)
+
+	systemAccount, err := arg.Accounts.LoadAccount(core.SystemAccountAddress)
+	require.NoError(t, err)
+
+	rawValue, _, err := systemAccount.(vmcommon.UserAccountHandler).AccountDataHandler().RetrieveValue([]byte("drwa:auth:auth_admin"))
+	require.NoError(t, err)
+	require.NotEmpty(t, rawValue)
+
+	record := &drwaAuthorizedCallerRecordForTest{}
+	require.NoError(t, json.Unmarshal(rawValue, record))
+	require.Equal(t, uint64(1), record.Version)
+
+	expectedAddr, err := hooks.NormalizeDRWAAuthorizedCallerAddress(arg.DRWAConfig.AuthorizedCallers.AuthAdmin)
+	require.NoError(t, err)
+	require.Equal(t, expectedAddr, record.Address)
 }
 
 func TestGenesisBlockCreator_CreateGenesisBlockAfterHardForkShouldCreateSCResultingAddresses(t *testing.T) {
@@ -749,9 +843,24 @@ func TestGenesisBlockCreator_GetIndexingDataShouldWork(t *testing.T) {
 }
 
 func getRequiredNumScrsTxs(idata map[uint32]*genesis.IndexingData, shardId uint32) int {
-	n := 2 * (len(idata[shardId].DeployInitialScTxs) + len(idata[shardId].DeploySystemScTxs) + len(idata[shardId].DelegationTxs))
+	n := 2 * (len(idata[shardId].DeployInitialScTxs) + len(idata[shardId].DelegationTxs))
+	n += getRequiredNumDeploySystemScrsTxs(idata[shardId].DeploySystemScTxs)
 	n += 3 * len(idata[shardId].StakingTxs)
 	return n
+}
+
+func getRequiredNumDeploySystemScrsTxs(deploySystemScTxs []data.TransactionHandler) int {
+	numScrs := 0
+	for _, tx := range deploySystemScTxs {
+		if bytes.Equal(tx.GetSndAddr(), vm.ValidatorSCAddress) || bytes.Equal(tx.GetSndAddr(), vm.StakingSCAddress) {
+			numScrs++
+			continue
+		}
+
+		numScrs += 2
+	}
+
+	return numScrs
 }
 
 func TestCreateArgsGenesisBlockCreator_ShouldErrWhenGetNewArgForShardFails(t *testing.T) {

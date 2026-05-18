@@ -16,9 +16,9 @@ import (
 	"github.com/multiversx/mx-chain-go/process"
 	"github.com/multiversx/mx-chain-go/process/mock"
 	"github.com/multiversx/mx-chain-go/storage/storageunit"
-	"github.com/multiversx/mx-chain-go/storage/txcache"
 	"github.com/multiversx/mx-chain-go/testscommon"
 	"github.com/multiversx/mx-chain-go/testscommon/hashingMocks"
+	"github.com/multiversx/mx-chain-go/txcache"
 	vmcommon "github.com/multiversx/mx-chain-vm-common-go"
 	datafield "github.com/multiversx/mx-chain-vm-common-go/parsers/dataField"
 	"github.com/stretchr/testify/assert"
@@ -255,6 +255,39 @@ func TestTransactionSimulator_ProcessTxShouldIncludeScrsAndReceipts(t *testing.T
 		hex.EncodeToString(expectedReceipts["keyReceipt"].GetSndAddr()),
 		results.Receipts[hex.EncodeToString([]byte("keyReceipt"))].SndAddr,
 	)
+}
+
+func TestTransactionSimulator_ProcessTxForwardsHeaderEpochToDataFieldParser(t *testing.T) {
+	t.Parallel()
+
+	var capturedEpoch uint32
+	args := getTxSimulatorArgs()
+	args.DataFieldParser = &testscommon.DataFieldParserStub{
+		ParseCalled: func(dataField []byte, sender, receiver []byte, numOfShards uint32, epoch uint32) *datafield.ResponseParseData {
+			capturedEpoch = epoch
+			return &datafield.ResponseParseData{}
+		},
+	}
+	args.IntermediateProcContainer = &mock.IntermProcessorContainerStub{
+		GetCalled: func(key block.Type) (process.IntermediateTransactionHandler, error) {
+			return &mock.IntermediateTransactionHandlerStub{
+				GetAllCurrentFinishedTxsCalled: func() map[string]data.TransactionHandler {
+					if key == block.SmartContractResultBlock {
+						return map[string]data.TransactionHandler{
+							"keySCr": &smartContractResult.SmartContractResult{},
+						}
+					}
+					return map[string]data.TransactionHandler{}
+				},
+			}, nil
+		},
+	}
+
+	ts, _ := NewTransactionSimulator(args)
+	header := &block.Header{Epoch: 17}
+	_, err := ts.ProcessTx(&transaction.Transaction{Nonce: 1}, header)
+	require.NoError(t, err)
+	require.Equal(t, uint32(17), capturedEpoch)
 }
 
 func getTxSimulatorArgs() ArgsTxSimulator {

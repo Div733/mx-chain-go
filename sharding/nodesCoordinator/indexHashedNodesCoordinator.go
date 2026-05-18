@@ -650,6 +650,10 @@ func (ihnc *indexHashedNodesCoordinator) GetValidatorsIndexes(
 	nodesConfig := ihnc.nodesConfig[epoch]
 	ihnc.mutNodesConfig.RUnlock()
 
+	if nodesConfig == nil {
+		return nil, fmt.Errorf("%w epoch=%v", ErrEpochNodesConfigDoesNotExist, epoch)
+	}
+
 	for _, pubKey := range publicKeys {
 		for index, value := range validatorsPubKeys[nodesConfig.shardID] {
 			if bytes.Equal([]byte(pubKey), value) {
@@ -701,7 +705,7 @@ func (ihnc *indexHashedNodesCoordinator) EpochStartPrepare(metaHdr data.HeaderHa
 		return
 	}
 
-	_, castOk := metaHdr.(*block.MetaBlock)
+	_, castOk := metaHdr.(data.MetaHeaderHandler)
 	if !castOk {
 		log.Error("could not process EpochStartPrepare on nodesCoordinator - not metaBlock")
 		return

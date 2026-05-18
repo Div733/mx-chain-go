@@ -45,6 +45,8 @@ func CreateDefaultConfig(tb testing.TB) *config.Configs {
 	_ = core.LoadJsonFile(&nodesConfig, NodesSetupPath)
 
 	mainP2PConfig.KadDhtPeerDiscovery.Enabled = false
+	mainP2PConfig.Node.EnableNATPortMap = false
+	fullArchiveP2PConfig.Node.EnableNATPortMap = false
 	prefsConfig.Preferences.DestinationShardAsObserver = "0"
 	prefsConfig.Preferences.ConnectionWatcherType = p2p.ConnectionWatcherTypePrint
 
@@ -94,6 +96,8 @@ func computeChainParameters(numInitialNodes uint32, numShardsWithoutMeta uint32)
 			MetachainConsensusGroupSize: nodesPerShards,
 			MetachainMinNumNodes:        nodesPerShards + diff,
 			RoundDuration:               2000,
+			RoundsPerEpoch:              200,
+			MinRoundsBetweenEpochs:      20,
 		},
 	}
 }

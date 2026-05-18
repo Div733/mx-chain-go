@@ -52,8 +52,12 @@ func NewMiniBlocksPoolsCleaner(args ArgMiniBlocksPoolsCleaner) (*miniBlocksPools
 		miniblocksPool:      args.MiniblocksPool,
 		mapMiniBlocksRounds: make(map[string]*mbInfo),
 	}
+	handlerID, err := core.UniqueIdentifierWithError()
+	if err != nil {
+		return nil, err
+	}
 
-	mbpc.miniblocksPool.RegisterHandler(mbpc.receivedMiniBlock, core.UniqueIdentifier())
+	mbpc.miniblocksPool.RegisterHandler(mbpc.receivedMiniBlock, handlerID)
 
 	return &mbpc, nil
 }
@@ -161,8 +165,9 @@ func (mbpc *miniBlocksPoolsCleaner) cleanMiniblocksPoolsIfNeeded() int {
 			continue
 		}
 
-		roundDif := mbpc.roundHandler.Index() - mbi.round
-		if roundDif <= mbpc.maxRoundsToKeepUnprocessedData {
+		round := mbpc.roundHandler.Index()
+		roundDif := round - mbi.round
+		if roundDif <= int64(mbpc.processConfigsHandler.GetMaxRoundsToKeepUnprocessedMiniBlocks(uint64(round))) {
 			log.Trace("cleaning miniblock not yet allowed",
 				"hash", []byte(hash),
 				"round", mbi.round,

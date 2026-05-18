@@ -9,22 +9,81 @@ import (
 
 	"github.com/multiversx/mx-chain-go/common"
 	"github.com/multiversx/mx-chain-go/statusHandler"
+	"github.com/multiversx/mx-chain-go/testscommon"
+	"github.com/multiversx/mx-chain-go/testscommon/enableEpochsHandlerMock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+func createStatusMetrics() *statusHandler.StatusMetrics {
+	sm, _ := statusHandler.NewStatusMetrics(&enableEpochsHandlerMock.EnableEpochsHandlerStub{}, &testscommon.EnableRoundsHandlerStub{})
+	return sm
+}
+
+func TestAppendSnapshotPrometheusMetricsShouldSanitizeAndRenderMetrics(t *testing.T) {
+	t.Parallel()
+
+	builder := strings.Builder{}
+	statusHandler.AppendSnapshotPrometheusMetricsForTests(&builder, 7, "erd_drwa_gate_", map[string]uint64{
+		"gate-reader-missing": 2,
+		"gate.decode.failure": 1,
+	})
+
+	output := builder.String()
+	assert.Contains(t, output, `erd_drwa_gate_gate_reader_missing{erd_shard_id="7"} 2`)
+	assert.Contains(t, output, `erd_drwa_gate_gate_decode_failure{erd_shard_id="7"} 1`)
+}
+
+func TestStatusMetricsWithoutP2PPrometheusStringShouldIncludeDRWAMetrics(t *testing.T) {
+	originalGateProvider := statusHandler.DrwaGateMetricsSnapshotProviderForTests()
+	originalSyncProvider := statusHandler.DrwaSyncMetricsSnapshotProviderForTests()
+	statusHandler.SetDrwaGateMetricsSnapshotProviderForTests(func() map[string]uint64 {
+		return map[string]uint64{"gate_reader_missing": 3}
+	})
+	statusHandler.SetDrwaSyncMetricsSnapshotProviderForTests(func() map[string]uint64 {
+		return map[string]uint64{"sync_apply_success": 5}
+	})
+	defer statusHandler.SetDrwaGateMetricsSnapshotProviderForTests(originalGateProvider)
+	defer statusHandler.SetDrwaSyncMetricsSnapshotProviderForTests(originalSyncProvider)
+
+	sm := createStatusMetrics()
+	output, err := sm.StatusMetricsWithoutP2PPrometheusString()
+
+	require.NoError(t, err)
+	assert.Contains(t, output, `erd_drwa_gate_gate_reader_missing{erd_shard_id="0"} 3`)
+	assert.Contains(t, output, `erd_drwa_sync_sync_apply_success{erd_shard_id="0"} 5`)
+}
+
 func TestNewStatusMetricsProvider(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
-	assert.NotNil(t, sm)
-	assert.False(t, sm.IsInterfaceNil())
+	t.Run("nil enable epochs handler should error", func(t *testing.T) {
+		t.Parallel()
+
+		sm, err := statusHandler.NewStatusMetrics(nil, &testscommon.EnableRoundsHandlerStub{})
+		assert.Nil(t, sm)
+		assert.Equal(t, statusHandler.ErrNilEnableEpochsHandler, err)
+	})
+	t.Run("nil enable rounds handler should error", func(t *testing.T) {
+		t.Parallel()
+
+		sm, err := statusHandler.NewStatusMetrics(&enableEpochsHandlerMock.EnableEpochsHandlerStub{}, nil)
+		assert.Nil(t, sm)
+		assert.Equal(t, statusHandler.ErrNilEnableRoundsHandler, err)
+	})
+	t.Run("should work", func(t *testing.T) {
+		t.Parallel()
+
+		sm := createStatusMetrics()
+		assert.NotNil(t, sm)
+		assert.False(t, sm.IsInterfaceNil())
+	})
 }
 
 func TestStatusMetricsProvider_IncrementCallNonExistingKey(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key1 := "test-key1"
 	sm.Increment(key1)
 
@@ -36,7 +95,7 @@ func TestStatusMetricsProvider_IncrementCallNonExistingKey(t *testing.T) {
 func TestStatusMetricsProvider_IncrementNonUint64ValueShouldNotWork(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key1 := "test-key2"
 	value1 := "value2"
 	// set a key which is initialized with a string and the Increment method won't affect the key
@@ -50,7 +109,7 @@ func TestStatusMetricsProvider_IncrementNonUint64ValueShouldNotWork(t *testing.T
 func TestStatusMetricsProvider_IncrementShouldWork(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key1 := "test-key3"
 	sm.SetUInt64Value(key1, 0)
 	sm.Increment(key1)
@@ -63,7 +122,7 @@ func TestStatusMetricsProvider_IncrementShouldWork(t *testing.T) {
 func TestStatusMetricsProvider_Decrement(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key := "test-key4"
 	sm.SetUInt64Value(key, 2)
 	sm.Decrement(key)
@@ -76,7 +135,7 @@ func TestStatusMetricsProvider_Decrement(t *testing.T) {
 func TestStatusMetricsProvider_SetInt64Value(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key := "test-key5"
 	value := int64(5)
 	sm.SetInt64Value(key, value)
@@ -90,7 +149,7 @@ func TestStatusMetricsProvider_SetInt64Value(t *testing.T) {
 func TestStatusMetricsProvider_SetStringValue(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key := "test-key6"
 	value := "value"
 	sm.SetStringValue(key, value)
@@ -104,7 +163,7 @@ func TestStatusMetricsProvider_SetStringValue(t *testing.T) {
 func TestStatusMetricsProvider_AddUint64Value(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key := "test-key6"
 	value := uint64(100)
 	sm.SetUInt64Value(key, value)
@@ -117,7 +176,7 @@ func TestStatusMetricsProvider_AddUint64Value(t *testing.T) {
 func TestStatusMetrics_StatusMetricsWithoutP2PPrometheusStringShouldPutDefaultShardIDLabel(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key1, value1 := "test-key7", uint64(100)
 	key2, value2 := "test-key8", "value8"
 	sm.SetUInt64Value(key1, value1)
@@ -133,7 +192,7 @@ func TestStatusMetrics_StatusMetricsWithoutP2PPrometheusStringShouldPutCorrectSh
 	t.Parallel()
 
 	shardID := uint32(37)
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	key1, value1 := "test-key7", uint64(100)
 	key2, value2 := "test-key8", "value8"
 	key3, value3 := common.MetricShardId, shardID
@@ -151,7 +210,7 @@ func TestStatusMetrics_StatusMetricsWithoutP2PPrometheusStringShouldComputeRound
 	t.Parallel()
 
 	shardID := uint32(2)
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 	sm.SetUInt64Value(common.MetricRoundsPassedInCurrentEpoch, 0)
 	sm.SetUInt64Value(common.MetricNoncesPassedInCurrentEpoch, 0)
 	sm.SetUInt64Value(common.MetricShardId, uint64(shardID))
@@ -159,6 +218,7 @@ func TestStatusMetrics_StatusMetricsWithoutP2PPrometheusStringShouldComputeRound
 	sm.SetUInt64Value(common.MetricCurrentRound, 137)
 	sm.SetUInt64Value(common.MetricNonceAtEpochStart, 100)
 	sm.SetUInt64Value(common.MetricNonce, 138)
+	sm.SetUInt64Value(common.MetricLastExecutedNonce, 136)
 
 	strRes, _ := sm.StatusMetricsWithoutP2PPrometheusString()
 
@@ -169,7 +229,7 @@ func TestStatusMetrics_StatusMetricsWithoutP2PPrometheusStringShouldComputeRound
 func TestStatusMetrics_NetworkConfig(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	sm.SetUInt64Value(common.MetricNumShardsWithoutMetachain, 1)
 	sm.SetUInt64Value(common.MetricNumNodesPerShard, 100)
@@ -228,22 +288,25 @@ func TestStatusMetrics_NetworkConfig(t *testing.T) {
 func TestStatusMetrics_NetworkMetrics(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	sm.SetUInt64Value(common.MetricCurrentRound, 200)
 	sm.SetUInt64Value(common.MetricRoundAtEpochStart, 100)
 	sm.SetUInt64Value(common.MetricNonce, 180)
+	sm.SetUInt64Value(common.MetricLastExecutedNonce, 179)
 	sm.SetUInt64Value(common.MetricBlockTimestamp, 18000)
 	sm.SetUInt64Value(common.MetricBlockTimestampMs, 18000000)
 	sm.SetUInt64Value(common.MetricHighestFinalBlock, 181)
 	sm.SetUInt64Value(common.MetricNonceAtEpochStart, 95)
 	sm.SetUInt64Value(common.MetricEpochNumber, 1)
 	sm.SetUInt64Value(common.MetricRoundsPerEpoch, 50)
+	sm.SetUInt64Value(common.MetricProposedNonce, 1501)
 
 	expectedConfig := map[string]interface{}{
 		"erd_current_round":                  uint64(200),
 		"erd_round_at_epoch_start":           uint64(100),
 		"erd_nonce":                          uint64(180),
+		"erd_last_executed_nonce":            uint64(179),
 		"erd_block_timestamp":                uint64(18000),
 		"erd_block_timestamp_ms":             uint64(18000000),
 		"erd_highest_final_nonce":            uint64(181),
@@ -252,6 +315,7 @@ func TestStatusMetrics_NetworkMetrics(t *testing.T) {
 		"erd_rounds_per_epoch":               uint64(50),
 		"erd_rounds_passed_in_current_epoch": uint64(100),
 		"erd_nonces_passed_in_current_epoch": uint64(85),
+		"erd_proposed_nonce":                 uint64(1501),
 	}
 
 	t.Run("no cross check value", func(t *testing.T) {
@@ -271,11 +335,12 @@ func TestStatusMetrics_NetworkMetrics(t *testing.T) {
 func TestStatusMetrics_StatusMetricsMapWithoutP2P(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	sm.SetUInt64Value(common.MetricCurrentRound, 100)
 	sm.SetUInt64Value(common.MetricRoundAtEpochStart, 200)
 	sm.SetUInt64Value(common.MetricNonce, 300)
+	sm.SetUInt64Value(common.MetricLastExecutedNonce, 298)
 	sm.SetUInt64Value(common.MetricBlockTimestamp, 30000)
 	sm.SetUInt64Value(common.MetricBlockTimestampMs, 30000000)
 	sm.SetStringValue(common.MetricAppVersion, "400")
@@ -289,6 +354,7 @@ func TestStatusMetrics_StatusMetricsMapWithoutP2P(t *testing.T) {
 	require.Equal(t, uint64(100), res[common.MetricCurrentRound])
 	require.Equal(t, uint64(200), res[common.MetricRoundAtEpochStart])
 	require.Equal(t, uint64(300), res[common.MetricNonce])
+	require.Equal(t, uint64(298), res[common.MetricLastExecutedNonce])
 	require.Equal(t, uint64(30000), res[common.MetricBlockTimestamp])
 	require.Equal(t, "400", res[common.MetricAppVersion])
 	require.NotContains(t, res, common.MetricRoundsPassedInCurrentEpoch)
@@ -300,7 +366,7 @@ func TestStatusMetrics_StatusMetricsMapWithoutP2P(t *testing.T) {
 func TestStatusMetrics_EnableEpochMetrics(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	sm.SetUInt64Value(common.MetricScDeployEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricBuiltInFunctionsEnableEpoch, uint64(4))
@@ -355,7 +421,6 @@ func TestStatusMetrics_EnableEpochMetrics(t *testing.T) {
 	sm.SetUInt64Value(common.MetricFrontRunningProtectionEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricIsPayableBySCEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricStorageAPICostOptimizationEnableEpoch, uint64(4))
-	sm.SetUInt64Value(common.MetricTransformToMultiShardCreateEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricESDTRegisterAndSetAllRolesEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricDoNotReturnOldBlockInBlockchainHookEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricAddFailedRelayedTxToInvalidMBsDisableEpoch, uint64(4))
@@ -416,6 +481,8 @@ func TestStatusMetrics_EnableEpochMetrics(t *testing.T) {
 	sm.SetUInt64Value(common.MetricBarnardOpcodesEnableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricAutomaticActivationOfNodesDisableEpoch, uint64(4))
 	sm.SetUInt64Value(common.MetricFixGetBalanceEnableEpoch, uint64(4))
+	sm.SetUInt64Value(common.MetricTailInflationEnableEpoch, uint64(4))
+	sm.SetUInt64Value(common.MetricSupernovaEnableEpoch, uint64(4))
 
 	maxNodesChangeConfig := []map[string]uint64{
 		{
@@ -495,7 +562,6 @@ func TestStatusMetrics_EnableEpochMetrics(t *testing.T) {
 		common.MetricFrontRunningProtectionEnableEpoch:                        uint64(4),
 		common.MetricIsPayableBySCEnableEpoch:                                 uint64(4),
 		common.MetricStorageAPICostOptimizationEnableEpoch:                    uint64(4),
-		common.MetricTransformToMultiShardCreateEnableEpoch:                   uint64(4),
 		common.MetricESDTRegisterAndSetAllRolesEnableEpoch:                    uint64(4),
 		common.MetricDoNotReturnOldBlockInBlockchainHookEnableEpoch:           uint64(4),
 		common.MetricAddFailedRelayedTxToInvalidMBsDisableEpoch:               uint64(4),
@@ -556,6 +622,8 @@ func TestStatusMetrics_EnableEpochMetrics(t *testing.T) {
 		common.MetricBarnardOpcodesEnableEpoch:                                uint64(4),
 		common.MetricAutomaticActivationOfNodesDisableEpoch:                   uint64(4),
 		common.MetricFixGetBalanceEnableEpoch:                                 uint64(4),
+		common.MetricTailInflationEnableEpoch:                                 uint64(4),
+		common.MetricSupernovaEnableEpoch:                                     uint64(4),
 		common.MetricMaxNodesChangeEnableEpoch: []map[string]interface{}{
 			{
 				common.MetricEpochEnable:            uint64(0),
@@ -577,7 +645,7 @@ func TestStatusMetrics_EnableEpochMetrics(t *testing.T) {
 func TestStatusMetrics_RatingsConfig(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	sm.SetUInt64Value(common.MetricRatingsGeneralStartRating, uint64(5001))
 	sm.SetUInt64Value(common.MetricRatingsGeneralMaxRating, uint64(10000))
@@ -667,7 +735,7 @@ func TestStatusMetrics_RatingsConfig(t *testing.T) {
 func TestStatusMetrics_BootstrapMetrics(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	sm.SetUInt64Value(common.MetricTrieSyncNumReceivedBytes, uint64(5001))
 	sm.SetUInt64Value(common.MetricTrieSyncNumProcessedNodes, uint64(10000))
@@ -689,7 +757,7 @@ func TestStatusMetrics_BootstrapMetrics(t *testing.T) {
 func TestStatusMetrics_IncrementConcurrentOperations(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	testKey := "test key"
 	sm.SetUInt64Value(testKey, 0)
@@ -713,7 +781,7 @@ func TestStatusMetrics_IncrementConcurrentOperations(t *testing.T) {
 func TestStatusMetrics_ConcurrentIncrementAndDecrement(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	initialValue := uint64(5000)
 
@@ -747,7 +815,7 @@ func TestStatusMetrics_ConcurrentIncrementAndDecrement(t *testing.T) {
 func TestStatusMetrics_ConcurrentOperations(t *testing.T) {
 	t.Parallel()
 
-	sm := statusHandler.NewStatusMetrics()
+	sm := createStatusMetrics()
 
 	startTime := time.Now()
 

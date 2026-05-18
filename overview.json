@@ -1,0 +1,2470 @@
+{
+  "rootFolder": "/home/divesh/Desktop/bugfixes/mx-chain-go",
+  "analyzedAt": "2026-05-18T07:22:37.206Z",
+  "rootStructure": [
+    {
+      "name": ".gitattributes",
+      "type": "file",
+      "size": 25,
+      "lines": 2
+    },
+    {
+      "name": ".github",
+      "type": "dir"
+    },
+    {
+      "name": ".gitignore",
+      "type": "file",
+      "size": 600,
+      "lines": 41
+    },
+    {
+      "name": "LICENSE",
+      "type": "file",
+      "size": 35149,
+      "lines": 675
+    },
+    {
+      "name": "Makefile",
+      "type": "file",
+      "size": 3207,
+      "lines": 109
+    },
+    {
+      "name": "README.md",
+      "type": "file",
+      "size": 8707,
+      "lines": 220
+    },
+    {
+      "name": "SECURITY.md",
+      "type": "file",
+      "size": 513,
+      "lines": 12
+    },
+    {
+      "name": "SECURITY_AUDIT_REPORT_mx_chain_go_NewArc.md",
+      "type": "file",
+      "size": 4548,
+      "lines": 107
+    },
+    {
+      "name": "api",
+      "type": "dir"
+    },
+    {
+      "name": "cmd",
+      "type": "dir"
+    },
+    {
+      "name": "codecov.yml",
+      "type": "file",
+      "size": 121,
+      "lines": 7
+    },
+    {
+      "name": "common",
+      "type": "dir"
+    },
+    {
+      "name": "config",
+      "type": "dir"
+    },
+    {
+      "name": "consensus",
+      "type": "dir"
+    },
+    {
+      "name": "coverage.txt",
+      "type": "file",
+      "size": 45538473,
+      "lines": 521749
+    },
+    {
+      "name": "dataRetriever",
+      "type": "dir"
+    },
+    {
+      "name": "dblookupext",
+      "type": "dir"
+    },
+    {
+      "name": "debug",
+      "type": "dir"
+    },
+    {
+      "name": "docker",
+      "type": "dir"
+    },
+    {
+      "name": "epochStart",
+      "type": "dir"
+    },
+    {
+      "name": "errors",
+      "type": "dir"
+    },
+    {
+      "name": "examples",
+      "type": "dir"
+    },
+    {
+      "name": "facade",
+      "type": "dir"
+    },
+    {
+      "name": "factory",
+      "type": "dir"
+    },
+    {
+      "name": "fallback",
+      "type": "dir"
+    },
+    {
+      "name": "genesis",
+      "type": "dir"
+    },
+    {
+      "name": "go.mod",
+      "type": "file",
+      "size": 11776,
+      "lines": 237
+    },
+    {
+      "name": "go.sum",
+      "type": "file",
+      "size": 89484,
+      "lines": 934
+    },
+    {
+      "name": "health",
+      "type": "dir"
+    },
+    {
+      "name": "heartbeat",
+      "type": "dir"
+    },
+    {
+      "name": "install-proto.sh",
+      "type": "file",
+      "size": 1304,
+      "lines": 55
+    },
+    {
+      "name": "integrationTests",
+      "type": "dir"
+    },
+    {
+      "name": "keysManagement",
+      "type": "dir"
+    },
+    {
+      "name": "multiversx-logo.svg",
+      "type": "file",
+      "size": 2963,
+      "lines": 14
+    },
+    {
+      "name": "node",
+      "type": "dir"
+    },
+    {
+      "name": "ntp",
+      "type": "dir"
+    },
+    {
+      "name": "outport",
+      "type": "dir"
+    },
+    {
+      "name": "overview.json",
+      "type": "file",
+      "size": 67553,
+      "lines": 2461
+    },
+    {
+      "name": "overview_architecture.puml",
+      "type": "file",
+      "size": 246,
+      "lines": 7
+    },
+    {
+      "name": "p2p",
+      "type": "dir"
+    },
+    {
+      "name": "process",
+      "type": "dir"
+    },
+    {
+      "name": "redundancy",
+      "type": "dir"
+    },
+    {
+      "name": "scripts",
+      "type": "dir"
+    },
+    {
+      "name": "sharding",
+      "type": "dir"
+    },
+    {
+      "name": "sonar-project.properties",
+      "type": "file",
+      "size": 149,
+      "lines": 2
+    },
+    {
+      "name": "state",
+      "type": "dir"
+    },
+    {
+      "name": "statusHandler",
+      "type": "dir"
+    },
+    {
+      "name": "storage",
+      "type": "dir"
+    },
+    {
+      "name": "testscommon",
+      "type": "dir"
+    },
+    {
+      "name": "trie",
+      "type": "dir"
+    },
+    {
+      "name": "txcache",
+      "type": "dir"
+    },
+    {
+      "name": "update",
+      "type": "dir"
+    },
+    {
+      "name": "vm",
+      "type": "dir"
+    }
+  ],
+  "rootFileSnippets": {
+    "LICENSE": [
+      "GNU GENERAL PUBLIC LICENSE",
+      "Version 3, 29 June 2007",
+      "",
+      "Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>",
+      "Everyone is permitted to copy and distribute verbatim copies",
+      "of this license document, but changing it is not allowed.",
+      "",
+      "Preamble",
+      "",
+      "The GNU General Public License is a free, copyleft license for"
+    ],
+    "Makefile": [
+      "CURRENT_DIRECTORY := $(shell pwd)",
+      "TESTS_TO_RUN := $(shell go list ./... | grep -v /integrationTests/ | grep -v /testscommon/ | grep -v mock | grep -v disabled | grep -v defaults)",
+      "",
+      "build:",
+      "go build ./...",
+      "",
+      "build-cmd:",
+      "(cd cmd/node && go build)",
+      "",
+      "clean-test:"
+    ],
+    "README.md": [
+      "<div style=\"text-align:center\">",
+      "<img",
+      "src=\"https://raw.githubusercontent.com/multiversx/mx-chain-go/master/multiversx-logo.svg\"",
+      "alt=\"MultiversX\">",
+      "</div>",
+      "<br>",
+      "",
+      "[![](https://img.shields.io/badge/made%20by-MultiversX-blue.svg)](http://multiversx.com/)",
+      "[![](https://img.shields.io/badge/project-MultiversX%20Mainnet-blue.svg)](https://explorer.multiversx.com/)",
+      "[![Go Report Card](https://goreportcard.com/badge/github.com/multiversx/mx-chain-go)](https://goreportcard.com/report/github.com/multiversx/mx-chain-go)"
+    ],
+    "SECURITY.md": [
+      "# Security Policy",
+      "",
+      "## Supported Versions",
+      "",
+      "Please see [Releases](https://github.com/multiversx/mx-chain-go/releases). We recommend using the [most recently released version](https://github.com/multiversx/mx-chain-go/releases/latest).",
+      "",
+      "## Reporting a Vulnerability",
+      "",
+      "Important note: for any immediate security report please proceed to our [report page](https://multiversx.com/report).",
+      ""
+    ],
+    "SECURITY_AUDIT_REPORT_mx_chain_go_NewArc.md": [
+      "# Security Audit Report — mx-chain-go-NewArc",
+      "",
+      "**Scope:** Full repository audit",
+      "**Confirmed real findings fixed:** 2",
+      "",
+      "---",
+      "",
+      "## Summary",
+      "",
+      "| ID | File | Severity | Class | Status |"
+    ],
+    "codecov.yml": [
+      "ignore:",
+      "- \"**/*.pb.go\"",
+      "- \"integrationTests/**\"",
+      "- \"testscommon/**\"",
+      "- \"**/mock/**\"",
+      "- \"**/disabled*.go\"",
+      ""
+    ],
+    "coverage.txt": [
+      "mode: atomic",
+      "github.com/multiversx/mx-chain-go/api/shared/logging/logging.go:15.71,17.49 2 0",
+      "github.com/multiversx/mx-chain-go/api/shared/logging/logging.go:17.49,19.3 1 0",
+      "github.com/multiversx/mx-chain-go/api/shared/logging/logging.go:21.2,21.39 1 0",
+      "github.com/multiversx/mx-chain-go/api/shared/logging/logging.go:21.39,25.3 1 0",
+      "github.com/multiversx/mx-chain-go/api/shared/logging/logging.go:26.2,26.56 1 0",
+      "github.com/multiversx/mx-chain-go/api/shared/shared.go:58.105,67.2 1 0",
+      "github.com/multiversx/mx-chain-go/api/shared/shared.go:70.76,80.2 2 0",
+      "github.com/multiversx/mx-chain-go/api/shared/shared.go:83.74,93.2 2 0",
+      "github.com/multiversx/mx-chain-go/api/shared/shared.go:96.59,104.2 1 0"
+    ],
+    "go.mod": [
+      "module github.com/multiversx/mx-chain-go",
+      "",
+      "go 1.23.0",
+      "",
+      "require (",
+      "github.com/beevik/ntp v1.3.0",
+      "github.com/davecgh/go-spew v1.1.1",
+      "github.com/gin-contrib/cors v1.6.0",
+      "github.com/gin-contrib/pprof v1.4.0",
+      "github.com/gin-gonic/gin v1.10.0"
+    ],
+    "go.sum": [
+      "cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=",
+      "cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=",
+      "cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=",
+      "cloud.google.com/go v0.37.0/go.mod h1:TS1dMSSfndXH133OKGwekG838Om/cQT0BUHV3HcBgoo=",
+      "dmitri.shuralyov.com/app/changes v0.0.0-20180602232624-0a106ad413e3/go.mod h1:Yl+fi1br7+Rr3LqpNJf1/uxUdtRUV+Tnj0o93V2B9MU=",
+      "dmitri.shuralyov.com/html/belt v0.0.0-20180602232347-f7d459c86be0/go.mod h1:JLBrvjyP0v+ecvNYvCpyZgu5/xkfAUhi6wJj28eUfSU=",
+      "dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1:a1inKt/atXimZ4Mv927x+r7UpyzRUf4emIoiiSC2TN4=",
+      "dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=",
+      "git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=",
+      "github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU="
+    ],
+    "install-proto.sh": [
+      "",
+      "PATH_GITHUB_GOGO=\"${GOPATH}\"/src/github.com/gogo",
+      "if [ ! -d \"${PATH_GITHUB_GOGO}\" ]",
+      "then",
+      "mkdir -p \"${PATH_GITHUB_GOGO}\"",
+      "fi",
+      "cd \"${PATH_GITHUB_GOGO}\"",
+      "",
+      "",
+      "if [ ! -d \"protobuf\" ]"
+    ],
+    "multiversx-logo.svg": [
+      "<svg width=\"558\" height=\"150\" viewBox=\"0 0 558 150\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">",
+      "<rect width=\"557.967\" height=\"150\" rx=\"16\" fill=\"black\"/>",
+      "<path d=\"M82.6918 98.2708L100.693 55.2267H114.098V111.348H105.238V63.8355L85.3751 111.648H79.0185L59.3299 64.1353V111.371H50.8131V55.2041H64.8145L82.6918 98.2708Z\" fill=\"white\"/>",
+      "<path d=\"M162.457 102.264C160.937 105.324 158.598 107.899 155.703 109.697C152.809 111.495 149.473 112.447 146.07 112.445C133.858 112.445 125.51 103.157 125.51 90.3856V62.0195H134.628V88.6831C134.628 97.965 139.888 104.057 148.236 104.057C156.871 104.057 162.434 97.767 162.434 88.6831V62.0195H171.474V111.348H162.457V102.264Z\" fill=\"white\"/>",
+      "<path d=\"M237.437 111.348H225.815C214.395 111.348 208.635 105.856 208.635 94.8714V70.2045H197.851V62.0199H208.635V49.5762H217.675V62.0199H237.437V70.2045H217.675V92.773C217.675 99.9621 219.959 102.954 227.801 102.954H237.431L237.437 111.348Z\" fill=\"white\"/>",
+      "<path d=\"M289.8 112.248H282.577L259.44 62.0205H269.566L286.442 100.064L303.228 62.0205H312.56L289.8 112.248Z\" fill=\"white\"/>",
+      "<path d=\"M362.506 87.7835H321.683C322.183 96.9693 328.737 104.187 338.373 104.187C348.2 104.187 352.172 98.8924 352.971 97.2973H361.898C361.105 101.59 354.844 112.569 338.362 112.569C323.173 112.569 312.536 101.183 312.536 86.7032C312.536 71.8273 323.162 60.8428 337.467 60.8428C351.879 60.8202 362.506 71.6067 362.506 87.7835ZM322.279 80.1928H352.476C350.186 72.704 344.926 68.6088 337.478 68.6088C329.53 68.6088 324.169 73.0037 322.279 80.1928Z\" fill=\"white\"/>",
+      "<path d=\"M380.305 111.349H371.266V62.0207H380.305V71.1047C381.695 67.5073 385.863 61.6191 397.384 61.6191H402.683V70.7031H397.187C384.575 70.7031 380.311 74.7021 380.311 83.4862L380.305 111.349Z\" fill=\"white\"/>",
+      "<path d=\"M422.57 89.7073C413.136 88.576 406.482 84.085 406.482 75.001C406.482 66.313 414.627 60.6172 426.643 60.6172C443.232 60.6172 448.582 69.209 450.179 74.1922H440.549C439.457 72.8913 435.778 68.4002 426.643 68.4002C419.195 68.4002 415.392 71.0926 415.392 74.6899C415.392 78.1855 417.879 80.3801 423.734 81.0815C427.61 81.5793 429.99 81.7772 434.265 82.2806C445.881 83.7739 450.849 88.7684 450.849 97.8579C450.849 106.144 443.299 112.734 429.394 112.734C412.118 112.734 406.054 102.049 404.963 97.5582H414.599C415.094 99.1532 419.065 104.747 429.394 104.747C437.736 104.747 441.809 101.749 441.809 97.8579C441.809 93.9664 439.722 91.6361 433.073 90.8668L422.57 89.7073Z\" fill=\"white\"/>",
+      "<path d=\"M244.191 38.2354H253.624V52.5174H244.191V38.2354ZM244.388 61.9916H253.422V111.325H244.388V61.9916Z\" fill=\"white\"/>"
+    ],
+    "overview.json": [
+      "{",
+      "\"rootFolder\": \"/home/divesh/Desktop/bugfixes/mx-chain-go-NewArc\",",
+      "\"analyzedAt\": \"2026-05-18T07:21:24.926Z\",",
+      "\"rootStructure\": [",
+      "{",
+      "\"name\": \".gitattributes\",",
+      "\"type\": \"file\",",
+      "\"size\": 25,",
+      "\"lines\": 2",
+      "},"
+    ],
+    "overview_architecture.puml": [
+      "@startuml",
+      "' Generated by SASVA Maria on 2026-05-18T07:21:26.445Z",
+      "' ERROR: Diagram generation failed",
+      "",
+      "note \"Architecture Diagram Generation Failed\\n\\nError: No chat model configured\\n\\nPlease check the logs for more details.\" as ErrorNote",
+      "",
+      "@enduml"
+    ],
+    "sonar-project.properties": [
+      "sonar.exclusions=**/*_test.go, integrationTests/**, testcommon/**, **/mock/**, **/disabled/**, **/disabled*.go,  examples/**, scripts/**, **/*.pb.go",
+      ""
+    ]
+  },
+  "importantFolders": [
+    {
+      "path": "api",
+      "category": "backend",
+      "fileCount": 65,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "cmd/assessment/testdata",
+      "category": "tests",
+      "fileCount": 9
+    },
+    {
+      "path": "cmd/logviewer/testing",
+      "category": "tests",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "cmd/node/config",
+      "category": "config",
+      "fileCount": 39
+    },
+    {
+      "path": "cmd/node/config/testKeys",
+      "category": "tests",
+      "fileCount": 12
+    },
+    {
+      "path": "cmd/seednode/api",
+      "category": "backend",
+      "fileCount": 2,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "cmd/seednode/config",
+      "category": "config",
+      "fileCount": 2
+    },
+    {
+      "path": "cmd/termui",
+      "category": "frontend",
+      "fileCount": 27,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "cmd/termui/view/termuic",
+      "category": "frontend",
+      "fileCount": 6,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "cmd/termui/view/termuic/termuiRenders",
+      "category": "frontend",
+      "fileCount": 3,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "common/configs",
+      "category": "config",
+      "fileCount": 11,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "common/goroutines",
+      "category": "build",
+      "fileCount": 2,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "config",
+      "category": "config",
+      "fileCount": 17,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "config/overridableConfig",
+      "category": "config",
+      "fileCount": 2,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "dataRetriever/txpool/memorytests",
+      "category": "tests",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "debug/goroutine",
+      "category": "build",
+      "fileCount": 5,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "docker",
+      "category": "docs",
+      "fileCount": 4
+    },
+    {
+      "path": "docker/termui",
+      "category": "frontend",
+      "fileCount": 1
+    },
+    {
+      "path": "epochStart/metachain/testdata",
+      "category": "tests",
+      "fileCount": 3
+    },
+    {
+      "path": "examples",
+      "category": "examples",
+      "fileCount": 5,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "factory/api",
+      "category": "backend",
+      "fileCount": 3,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "factory/core",
+      "category": "core",
+      "fileCount": 4,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "factory/statusCore",
+      "category": "core",
+      "fileCount": 4,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "genesis/parsing/testdata",
+      "category": "tests",
+      "fileCount": 6
+    },
+    {
+      "path": "genesis/process/intermediate",
+      "category": "assets",
+      "fileCount": 12,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "genesis/process/intermediate/testdata",
+      "category": "tests",
+      "fileCount": 1
+    },
+    {
+      "path": "genesis/process/testdata",
+      "category": "tests",
+      "fileCount": 6
+    },
+    {
+      "path": "integrationTests",
+      "category": "tests",
+      "fileCount": 563,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/api",
+      "category": "backend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/chainSimulator/relayedTx/testData",
+      "category": "tests",
+      "fileCount": 2
+    },
+    {
+      "path": "integrationTests/factory/bootstrapComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/consensusComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/coreComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/cryptoComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/dataComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/heartbeatComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/networkComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/processComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/stateComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/statusComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/statusCoreComponents",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/factory/testdata",
+      "category": "tests",
+      "fileCount": 3
+    },
+    {
+      "path": "integrationTests/frontend",
+      "category": "frontend",
+      "fileCount": 4,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/frontend/staking/testdata",
+      "category": "tests",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/longTests",
+      "category": "tests",
+      "fileCount": 4,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/multiShard/endOfEpoch/epochStartChangeWithoutTransactionInMultiShardedEnvironment",
+      "category": "build",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/multiShard/hardFork/testdata",
+      "category": "tests",
+      "fileCount": 3
+    },
+    {
+      "path": "integrationTests/multiShard/smartContract/testdata",
+      "category": "tests",
+      "fileCount": 20,
+      "primaryLanguage": "C"
+    },
+    {
+      "path": "integrationTests/multiShard/smartContract/testdata/callBuiltin",
+      "category": "frontend",
+      "fileCount": 3,
+      "primaryLanguage": "C"
+    },
+    {
+      "path": "integrationTests/multiShard/smartContract/testdata/callBuiltin/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/multiShard/smartContract/testdata/delegate-mock/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/multiShard/smartContract/testdata/first/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/multiShard/smartContract/testdata/second/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/multiShard/softfork/testdata",
+      "category": "tests",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/multiShard/transaction/txRouting",
+      "category": "build",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/realcomponents",
+      "category": "frontend",
+      "fileCount": 5,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/realcomponents/testdata",
+      "category": "tests",
+      "fileCount": 2
+    },
+    {
+      "path": "integrationTests/vm/esdt/testdata",
+      "category": "tests",
+      "fileCount": 34
+    },
+    {
+      "path": "integrationTests/vm/esdt/testdata/execute/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/txsFee/testdata",
+      "category": "tests",
+      "fileCount": 20,
+      "primaryLanguage": "C/C++"
+    },
+    {
+      "path": "integrationTests/vm/txsFee/testdata/first/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/txsFee/testdata/second/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata",
+      "category": "tests",
+      "fileCount": 128,
+      "primaryLanguage": "C"
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/bad-functionNames/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/bad-misc/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/bad-reservedFunctions/function-ChangeOwnerAddress/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/bad-reservedFunctions/function-ClaimDeveloperRewards/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/bad-reservedFunctions/function-asyncCall/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/c-api-tests",
+      "category": "backend",
+      "fileCount": 16,
+      "primaryLanguage": "C"
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/c-api-tests/bigInt/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/c-api-tests/crypto/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/c-api-tests/ecBenchmark/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/counter/output",
+      "category": "build",
+      "fileCount": 3
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/deployer-custom/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/developer-rewards/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/distributeRewards",
+      "category": "build",
+      "fileCount": 2
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/erc20-c-03/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/hello-v1/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/hello-v2/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/hello-v3/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/history/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/misc/cpucalculate_wasm/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/misc/fib_wasm/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/misc/test_abort",
+      "category": "tests",
+      "fileCount": 3,
+      "primaryLanguage": "C"
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/storage100/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/transferValue/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/trieStoreAndLoad/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/upgrades-parent/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/wasmvm/scenariosConverter/scenariosTests",
+      "category": "tests",
+      "fileCount": 12,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "integrationTests/vm/wasm/wasmvm/scenariosConverter/scenariosTests/adder/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "integrationTests/vm/wasm/wasmvm/scenariosConverter/scenariosTests/mex/output",
+      "category": "build",
+      "fileCount": 1
+    },
+    {
+      "path": "node/chainSimulator/components",
+      "category": "frontend",
+      "fileCount": 46,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "node/chainSimulator/components/api",
+      "category": "backend",
+      "fileCount": 6,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "node/chainSimulator/configs",
+      "category": "config",
+      "fileCount": 2,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "node/external/blockAPI",
+      "category": "backend",
+      "fileCount": 16,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "node/external/transactionAPI",
+      "category": "backend",
+      "fileCount": 21,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "node/external/transactionAPI/testData",
+      "category": "tests",
+      "fileCount": 4
+    },
+    {
+      "path": "outport",
+      "category": "build",
+      "fileCount": 50,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "p2p/config",
+      "category": "config",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "process/smartContract/builtInFunctions",
+      "category": "frontend",
+      "fileCount": 2,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "scripts",
+      "category": "scripts",
+      "fileCount": 32,
+      "primaryLanguage": "Shell"
+    },
+    {
+      "path": "scripts/docker-testnet",
+      "category": "tests",
+      "fileCount": 8,
+      "primaryLanguage": "Shell"
+    },
+    {
+      "path": "scripts/testnet",
+      "category": "tests",
+      "fileCount": 20,
+      "primaryLanguage": "Shell"
+    },
+    {
+      "path": "sharding/mock/testdata",
+      "category": "tests",
+      "fileCount": 2
+    },
+    {
+      "path": "storage/latestData",
+      "category": "tests",
+      "fileCount": 2,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon",
+      "category": "tests",
+      "fileCount": 314,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/api",
+      "category": "backend",
+      "fileCount": 3,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/bootstrapperStubs",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/components",
+      "category": "frontend",
+      "fileCount": 3,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/goroutines",
+      "category": "build",
+      "fileCount": 11,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/goroutines/testdata",
+      "category": "tests",
+      "fileCount": 3
+    },
+    {
+      "path": "testscommon/integrationtests",
+      "category": "tests",
+      "fileCount": 3,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/outport",
+      "category": "build",
+      "fileCount": 4,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "testscommon/txDataBuilder",
+      "category": "frontend",
+      "fileCount": 1,
+      "primaryLanguage": "Go"
+    },
+    {
+      "path": "trie/keyBuilder",
+      "category": "frontend",
+      "fileCount": 5,
+      "primaryLanguage": "Go"
+    }
+  ],
+  "readmeParagraphs": {
+    "dataRetriever/txpool": "# Transactions Pool",
+    "scripts/docker-testnet": "# Setting up a local-testnet with Docker",
+    "txcache": "## Mempool",
+    "root": "<div style=\"text-align:center\">\n  <img\n  src=\"https://raw.githubusercontent.com/multiversx/mx-chain-go/master/multiversx-logo.svg\""
+  },
+  "totals": {
+    "numFiles": 3642,
+    "numDirs": 701,
+    "totalSizeBytes": 79269177,
+    "totalLinesOfCode": 863283
+  },
+  "fileCategories": {
+    "config": 75,
+    "other": 231,
+    "documentation": 19,
+    "build": 3,
+    "source": 3301,
+    "test": 13
+  },
+  "linesOfCodePerLanguage": {
+    "Go": 856654,
+    "Shell": 2912,
+    "C": 2534,
+    "C/C++": 1090,
+    "C++": 93
+  },
+  "filesPerLanguage": {
+    "Go": 3205,
+    "Shell": 32,
+    "C": 34,
+    "C/C++": 29,
+    "C++": 1
+  },
+  "projectTypes": [
+    "Go (Modules)"
+  ],
+  "frameworks": [],
+  "entryPoints": [
+    "cmd/CLI.md.sh",
+    "scripts/docker-testnet/build.sh",
+    "scripts/docker-testnet/clean.sh",
+    "scripts/docker-testnet/functions.sh",
+    "scripts/docker-testnet/setup.sh",
+    "scripts/docker-testnet/start.sh",
+    "scripts/docker-testnet/stop.sh",
+    "scripts/generators/mockGenerator.sh",
+    "scripts/golangci/run_golangci_lint.sh",
+    "scripts/testnet/clean.sh",
+    "scripts/testnet/config.sh",
+    "scripts/testnet/hardfork.sh",
+    "scripts/testnet/pause.sh",
+    "scripts/testnet/prerequisites.sh",
+    "scripts/testnet/reset.sh",
+    "scripts/testnet/resume.sh",
+    "scripts/testnet/start.sh",
+    "scripts/testnet/stop.sh",
+    "scripts/testnet/txgen-basic.sh",
+    "scripts/testnet/txgen-erc20.sh",
+    "scripts/testnet/txgen-esdt.sh"
+  ],
+  "ciCdTools": [
+    "Docker",
+    "GitHub Actions"
+  ],
+  "packageManagers": [
+    "go mod"
+  ],
+  "topLevelDirectories": [
+    {
+      "name": "integrationTests",
+      "numFiles": 563,
+      "totalLoc": 99995,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "epochStart",
+      "numFiles": 142,
+      "totalLoc": 48241,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "consensus",
+      "numFiles": 117,
+      "totalLoc": 45657,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "dataRetriever",
+      "numFiles": 180,
+      "totalLoc": 33739,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "factory",
+      "numFiles": 123,
+      "totalLoc": 29039,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "common",
+      "numFiles": 149,
+      "totalLoc": 19780,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "api",
+      "numFiles": 65,
+      "totalLoc": 17313,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "genesis",
+      "numFiles": 88,
+      "totalLoc": 12111,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "heartbeat",
+      "numFiles": 62,
+      "totalLoc": 10205,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "cmd",
+      "numFiles": 115,
+      "totalLoc": 7905,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "dblookupext",
+      "numFiles": 31,
+      "totalLoc": 7313,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "facade",
+      "numFiles": 12,
+      "totalLoc": 5454,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "config",
+      "numFiles": 17,
+      "totalLoc": 3752,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "debug",
+      "numFiles": 35,
+      "totalLoc": 3719,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "keysManagement",
+      "numFiles": 10,
+      "totalLoc": 2600,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "health",
+      "numFiles": 11,
+      "totalLoc": 849,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "examples",
+      "numFiles": 5,
+      "totalLoc": 654,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "errors",
+      "numFiles": 1,
+      "totalLoc": 619,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "fallback",
+      "numFiles": 4,
+      "totalLoc": 472,
+      "dominantLanguage": "Go"
+    },
+    {
+      "name": "docker",
+      "numFiles": 4,
+      "totalLoc": 0
+    }
+  ],
+  "detailedDirectories": [
+    {
+      "path": "epochStart",
+      "name": "epochStart",
+      "level": 1,
+      "numFiles": 142,
+      "totalLoc": 48241,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 142 files (Go)",
+      "subdirectories": [
+        {
+          "path": "epochStart/metachain",
+          "name": "metachain",
+          "level": 2,
+          "numFiles": 44,
+          "totalLoc": 23072,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 44 files (Go)",
+          "subdirectories": [
+            {
+              "path": "epochStart/metachain/disabled",
+              "name": "disabled",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 44,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 2 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "epochStart/metachain/testdata",
+              "name": "testdata",
+              "level": 3,
+              "numFiles": 3,
+              "totalLoc": 0,
+              "category": "Data",
+              "description": "Data module with 3 files",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "epochStart/bootstrap",
+          "name": "bootstrap",
+          "level": 2,
+          "numFiles": 46,
+          "totalLoc": 17228,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 46 files (Go)",
+          "subdirectories": [
+            {
+              "path": "epochStart/bootstrap/disabled",
+              "name": "disabled",
+              "level": 3,
+              "numFiles": 17,
+              "totalLoc": 1074,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 17 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "epochStart/bootstrap/factory",
+              "name": "factory",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 141,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 1 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "epochStart/bootstrap/types",
+              "name": "types",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 33,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 1 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "epochStart/shardchain",
+          "name": "shardchain",
+          "level": 2,
+          "numFiles": 7,
+          "totalLoc": 4344,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 7 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "epochStart/mock",
+          "name": "mock",
+          "level": 2,
+          "numFiles": 29,
+          "totalLoc": 1784,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 29 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "epochStart/notifier",
+          "name": "notifier",
+          "level": 2,
+          "numFiles": 11,
+          "totalLoc": 963,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 11 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "consensus",
+      "name": "consensus",
+      "level": 1,
+      "numFiles": 117,
+      "totalLoc": 45657,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 117 files (Go)",
+      "subdirectories": [
+        {
+          "path": "consensus/broadcast",
+          "name": "broadcast",
+          "level": 2,
+          "numFiles": 12,
+          "totalLoc": 5716,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 12 files (Go)",
+          "subdirectories": [
+            {
+              "path": "consensus/broadcast/shared",
+              "name": "shared",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 27,
+              "dominantLanguage": "Go",
+              "category": "Infrastructure",
+              "description": "Infrastructure module with 1 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "consensus/round",
+          "name": "round",
+          "level": 2,
+          "numFiles": 3,
+          "totalLoc": 981,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 3 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "consensus/chronology",
+          "name": "chronology",
+          "level": 2,
+          "numFiles": 4,
+          "totalLoc": 892,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 4 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "consensus/mock",
+          "name": "mock",
+          "level": 2,
+          "numFiles": 16,
+          "totalLoc": 865,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 16 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "consensus/blacklist",
+          "name": "blacklist",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 232,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 2 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "dataRetriever",
+      "name": "dataRetriever",
+      "level": 1,
+      "numFiles": 180,
+      "totalLoc": 33739,
+      "dominantLanguage": "Go",
+      "category": "Data",
+      "description": "Data module with 180 files (Go)",
+      "subdirectories": [
+        {
+          "path": "dataRetriever/factory",
+          "name": "factory",
+          "level": 2,
+          "numFiles": 32,
+          "totalLoc": 6670,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 32 files (Go)",
+          "subdirectories": [
+            {
+              "path": "dataRetriever/factory/resolverscontainer",
+              "name": "resolverscontainer",
+              "level": 3,
+              "numFiles": 7,
+              "totalLoc": 2152,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 7 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "dataRetriever/factory/requestersContainer",
+              "name": "requestersContainer",
+              "level": 3,
+              "numFiles": 7,
+              "totalLoc": 1491,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 7 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "dataRetriever/factory/containers",
+              "name": "containers",
+              "level": 3,
+              "numFiles": 8,
+              "totalLoc": 1294,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 8 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "dataRetriever/factory/storageRequestersContainer",
+              "name": "storageRequestersContainer",
+              "level": 3,
+              "numFiles": 6,
+              "totalLoc": 1241,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 6 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "dataRetriever/factory/epochProviders",
+              "name": "epochProviders",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 89,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 2 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "dataRetriever/dataPool",
+          "name": "dataPool",
+          "level": 2,
+          "numFiles": 22,
+          "totalLoc": 3183,
+          "dominantLanguage": "Go",
+          "category": "Data",
+          "description": "Data module with 22 files (Go)",
+          "subdirectories": [
+            {
+              "path": "dataRetriever/dataPool/headersCache",
+              "name": "headersCache",
+              "level": 3,
+              "numFiles": 8,
+              "totalLoc": 1339,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 8 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "dataRetriever/dataPool/proofsCache",
+              "name": "proofsCache",
+              "level": 3,
+              "numFiles": 8,
+              "totalLoc": 1026,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 8 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "dataRetriever/mock",
+          "name": "mock",
+          "level": 2,
+          "numFiles": 27,
+          "totalLoc": 1189,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 27 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "dataRetriever/blockchain",
+          "name": "blockchain",
+          "level": 2,
+          "numFiles": 9,
+          "totalLoc": 1078,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 9 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "dataRetriever/provider",
+          "name": "provider",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 438,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 2 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "factory",
+      "name": "factory",
+      "level": 1,
+      "numFiles": 123,
+      "totalLoc": 29039,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 123 files (Go)",
+      "subdirectories": [
+        {
+          "path": "factory/consensus",
+          "name": "consensus",
+          "level": 2,
+          "numFiles": 4,
+          "totalLoc": 1985,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 4 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "factory/bootstrap",
+          "name": "bootstrap",
+          "level": 2,
+          "numFiles": 8,
+          "totalLoc": 1938,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 8 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "factory/core",
+          "name": "core",
+          "level": 2,
+          "numFiles": 4,
+          "totalLoc": 1707,
+          "dominantLanguage": "Go",
+          "category": "Core/Business",
+          "description": "Core/Business module with 4 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "factory/api",
+          "name": "api",
+          "level": 2,
+          "numFiles": 3,
+          "totalLoc": 1301,
+          "dominantLanguage": "Go",
+          "category": "Service",
+          "description": "Service module with 3 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "factory/block",
+          "name": "block",
+          "level": 2,
+          "numFiles": 7,
+          "totalLoc": 697,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 7 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "common",
+      "name": "common",
+      "level": 1,
+      "numFiles": 149,
+      "totalLoc": 19780,
+      "dominantLanguage": "Go",
+      "category": "Infrastructure",
+      "description": "Infrastructure module with 149 files (Go)",
+      "subdirectories": [
+        {
+          "path": "common/configs",
+          "name": "configs",
+          "level": 2,
+          "numFiles": 11,
+          "totalLoc": 1503,
+          "dominantLanguage": "Go",
+          "category": "Configuration",
+          "description": "Configuration module with 11 files (Go)",
+          "subdirectories": [
+            {
+              "path": "common/configs/dto",
+              "name": "dto",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 18,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 1 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "common/compatibility",
+          "name": "compatibility",
+          "level": 2,
+          "numFiles": 5,
+          "totalLoc": 649,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 5 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "common/chainparametersnotifier",
+          "name": "chainparametersnotifier",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 225,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 2 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "common/consensus",
+          "name": "consensus",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 65,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 2 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "common/crypto",
+          "name": "crypto",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 10,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 1 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "api",
+      "name": "api",
+      "level": 1,
+      "numFiles": 65,
+      "totalLoc": 17313,
+      "dominantLanguage": "Go",
+      "category": "Service",
+      "description": "Service module with 65 files (Go)",
+      "subdirectories": [
+        {
+          "path": "api/groups",
+          "name": "groups",
+          "level": 2,
+          "numFiles": 27,
+          "totalLoc": 13086,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 27 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "api/middleware",
+          "name": "middleware",
+          "level": 2,
+          "numFiles": 11,
+          "totalLoc": 1058,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 11 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "api/gin",
+          "name": "gin",
+          "level": 2,
+          "numFiles": 9,
+          "totalLoc": 1002,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 9 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "api/logs",
+          "name": "logs",
+          "level": 2,
+          "numFiles": 7,
+          "totalLoc": 621,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 7 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "api/errors",
+          "name": "errors",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 198,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 1 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "cmd",
+      "name": "cmd",
+      "level": 1,
+      "numFiles": 115,
+      "totalLoc": 7905,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 115 files (Go)",
+      "subdirectories": [
+        {
+          "path": "cmd/node",
+          "name": "node",
+          "level": 2,
+          "numFiles": 45,
+          "totalLoc": 1231,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 45 files (Go)",
+          "subdirectories": [
+            {
+              "path": "cmd/node/factory",
+              "name": "factory",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 59,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 1 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "cmd/node/config",
+              "name": "config",
+              "level": 3,
+              "numFiles": 39,
+              "totalLoc": 0,
+              "category": "Configuration",
+              "description": "Configuration module with 39 files",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "cmd/assessment",
+          "name": "assessment",
+          "level": 2,
+          "numFiles": 28,
+          "totalLoc": 1194,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 28 files (Go)",
+          "subdirectories": [
+            {
+              "path": "cmd/assessment/benchmarks",
+              "name": "benchmarks",
+              "level": 3,
+              "numFiles": 16,
+              "totalLoc": 1015,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 16 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "cmd/assessment/mock",
+              "name": "mock",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 33,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 1 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "cmd/assessment/testdata",
+              "name": "testdata",
+              "level": 3,
+              "numFiles": 9,
+              "totalLoc": 0,
+              "category": "Data",
+              "description": "Data module with 9 files",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "cmd/logviewer",
+          "name": "logviewer",
+          "level": 2,
+          "numFiles": 3,
+          "totalLoc": 616,
+          "dominantLanguage": "Go",
+          "category": "Views/Templates",
+          "description": "Views/Templates module with 3 files (Go)",
+          "subdirectories": [
+            {
+              "path": "cmd/logviewer/testing",
+              "name": "testing",
+              "level": 3,
+              "numFiles": 1,
+              "totalLoc": 274,
+              "dominantLanguage": "Go",
+              "category": "Testing",
+              "description": "Testing module with 1 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "cmd/keygenerator",
+          "name": "keygenerator",
+          "level": 2,
+          "numFiles": 5,
+          "totalLoc": 613,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 5 files (Go)",
+          "subdirectories": [
+            {
+              "path": "cmd/keygenerator/converter",
+              "name": "converter",
+              "level": 3,
+              "numFiles": 3,
+              "totalLoc": 123,
+              "dominantLanguage": "Go",
+              "category": "General",
+              "description": "General module with 3 files (Go)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "cmd/seednode",
+          "name": "seednode",
+          "level": 2,
+          "numFiles": 6,
+          "totalLoc": 549,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 6 files (Go)",
+          "subdirectories": [
+            {
+              "path": "cmd/seednode/api",
+              "name": "api",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 166,
+              "dominantLanguage": "Go",
+              "category": "Service",
+              "description": "Service module with 2 files (Go)",
+              "subdirectories": []
+            },
+            {
+              "path": "cmd/seednode/config",
+              "name": "config",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 0,
+              "category": "Configuration",
+              "description": "Configuration module with 2 files",
+              "subdirectories": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dblookupext",
+      "name": "dblookupext",
+      "level": 1,
+      "numFiles": 31,
+      "totalLoc": 7313,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 31 files (Go)",
+      "subdirectories": [
+        {
+          "path": "dblookupext/esdtSupply",
+          "name": "esdtSupply",
+          "level": 2,
+          "numFiles": 13,
+          "totalLoc": 2555,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 13 files (Go)",
+          "subdirectories": [
+            {
+              "path": "dblookupext/esdtSupply/proto",
+              "name": "proto",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 0,
+              "category": "General",
+              "description": "General module with 2 files",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "dblookupext/factory",
+          "name": "factory",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 283,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 2 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "dblookupext/disabled",
+          "name": "disabled",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 65,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 1 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "facade",
+      "name": "facade",
+      "level": 1,
+      "numFiles": 12,
+      "totalLoc": 5454,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 12 files (Go)",
+      "subdirectories": [
+        {
+          "path": "facade/initial",
+          "name": "initial",
+          "level": 2,
+          "numFiles": 4,
+          "totalLoc": 1030,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 4 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "facade/mock",
+          "name": "mock",
+          "level": 2,
+          "numFiles": 3,
+          "totalLoc": 828,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 3 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "config",
+      "name": "config",
+      "level": 1,
+      "numFiles": 17,
+      "totalLoc": 3752,
+      "dominantLanguage": "Go",
+      "category": "Configuration",
+      "description": "Configuration module with 17 files (Go)",
+      "subdirectories": [
+        {
+          "path": "config/overridableConfig",
+          "name": "overridableConfig",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 247,
+          "dominantLanguage": "Go",
+          "category": "Configuration",
+          "description": "Configuration module with 2 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "debug",
+      "name": "debug",
+      "level": 1,
+      "numFiles": 35,
+      "totalLoc": 3719,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 35 files (Go)",
+      "subdirectories": [
+        {
+          "path": "debug/handler",
+          "name": "handler",
+          "level": 2,
+          "numFiles": 9,
+          "totalLoc": 1398,
+          "dominantLanguage": "Go",
+          "category": "Controllers",
+          "description": "Controllers module with 9 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "debug/antiflood",
+          "name": "antiflood",
+          "level": 2,
+          "numFiles": 3,
+          "totalLoc": 466,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 3 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "debug/goroutine",
+          "name": "goroutine",
+          "level": 2,
+          "numFiles": 5,
+          "totalLoc": 386,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 5 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "debug/factory",
+          "name": "factory",
+          "level": 2,
+          "numFiles": 5,
+          "totalLoc": 158,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 5 files (Go)",
+          "subdirectories": []
+        },
+        {
+          "path": "debug/mock",
+          "name": "mock",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 29,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 1 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "examples",
+      "name": "examples",
+      "level": 1,
+      "numFiles": 5,
+      "totalLoc": 654,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 5 files (Go)",
+      "subdirectories": []
+    },
+    {
+      "path": "errors",
+      "name": "errors",
+      "level": 1,
+      "numFiles": 1,
+      "totalLoc": 619,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 1 files (Go)",
+      "subdirectories": []
+    },
+    {
+      "path": "fallback",
+      "name": "fallback",
+      "level": 1,
+      "numFiles": 4,
+      "totalLoc": 472,
+      "dominantLanguage": "Go",
+      "category": "General",
+      "description": "General module with 4 files (Go)",
+      "subdirectories": [
+        {
+          "path": "fallback/mock",
+          "name": "mock",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 132,
+          "dominantLanguage": "Go",
+          "category": "General",
+          "description": "General module with 2 files (Go)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "docker",
+      "name": "docker",
+      "level": 1,
+      "numFiles": 4,
+      "totalLoc": 0,
+      "category": "Documentation",
+      "description": "Documentation module with 4 files",
+      "subdirectories": [
+        {
+          "path": "docker/keygenerator",
+          "name": "keygenerator",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 0,
+          "category": "General",
+          "description": "General module with 1 files",
+          "subdirectories": []
+        },
+        {
+          "path": "docker/node",
+          "name": "node",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 0,
+          "category": "General",
+          "description": "General module with 1 files",
+          "subdirectories": []
+        },
+        {
+          "path": "docker/seednode",
+          "name": "seednode",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 0,
+          "category": "General",
+          "description": "General module with 1 files",
+          "subdirectories": []
+        },
+        {
+          "path": "docker/termui",
+          "name": "termui",
+          "level": 2,
+          "numFiles": 1,
+          "totalLoc": 0,
+          "category": "Web/UI",
+          "description": "Web/UI module with 1 files",
+          "subdirectories": []
+        }
+      ]
+    }
+  ],
+  "architecturalInsights": {
+    "coreApplications": [
+      {
+        "path": "api",
+        "name": "api",
+        "level": 1,
+        "numFiles": 65,
+        "totalLoc": 17313,
+        "dominantLanguage": "Go",
+        "category": "Service",
+        "description": "Service module with 65 files (Go)",
+        "subdirectories": [
+          {
+            "path": "api/groups",
+            "name": "groups",
+            "level": 2,
+            "numFiles": 27,
+            "totalLoc": 13086,
+            "dominantLanguage": "Go",
+            "category": "General",
+            "description": "General module with 27 files (Go)",
+            "subdirectories": []
+          },
+          {
+            "path": "api/middleware",
+            "name": "middleware",
+            "level": 2,
+            "numFiles": 11,
+            "totalLoc": 1058,
+            "dominantLanguage": "Go",
+            "category": "General",
+            "description": "General module with 11 files (Go)",
+            "subdirectories": []
+          },
+          {
+            "path": "api/gin",
+            "name": "gin",
+            "level": 2,
+            "numFiles": 9,
+            "totalLoc": 1002,
+            "dominantLanguage": "Go",
+            "category": "General",
+            "description": "General module with 9 files (Go)",
+            "subdirectories": []
+          },
+          {
+            "path": "api/logs",
+            "name": "logs",
+            "level": 2,
+            "numFiles": 7,
+            "totalLoc": 621,
+            "dominantLanguage": "Go",
+            "category": "General",
+            "description": "General module with 7 files (Go)",
+            "subdirectories": []
+          },
+          {
+            "path": "api/errors",
+            "name": "errors",
+            "level": 2,
+            "numFiles": 1,
+            "totalLoc": 198,
+            "dominantLanguage": "Go",
+            "category": "General",
+            "description": "General module with 1 files (Go)",
+            "subdirectories": []
+          }
+        ]
+      }
+    ],
+    "entryPointDetails": [
+      {
+        "path": "../../../cmd/CLI.md.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/docker-testnet/build.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/docker-testnet/clean.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/docker-testnet/functions.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/docker-testnet/setup.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/docker-testnet/start.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/docker-testnet/stop.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/generators/mockGenerator.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/golangci/run_golangci_lint.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/clean.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/config.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/hardfork.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/pause.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/prerequisites.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/reset.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/resume.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/start.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/stop.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/txgen-basic.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/txgen-erc20.sh",
+        "type": "Unknown",
+        "description": ""
+      },
+      {
+        "path": "../../../scripts/testnet/txgen-esdt.sh",
+        "type": "Unknown",
+        "description": ""
+      }
+    ],
+    "serviceArchitecture": {
+      "microservices": [
+        "api"
+      ],
+      "monoliths": [],
+      "libraries": [
+        "common"
+      ]
+    },
+    "layeredArchitecture": {
+      "presentation": [],
+      "business": [],
+      "data": [
+        "dataRetriever"
+      ],
+      "infrastructure": [
+        "common"
+      ]
+    }
+  },
+  "largeFiles": [
+    {
+      "path": "coverage.txt",
+      "sizeMb": 43.43
+    },
+    {
+      "path": "integrationTests/vm/wasm/testdata/distributeRewards/data.hex",
+      "sizeMb": 2.2
+    }
+  ],
+  "dependencies": {
+    "production": [],
+    "development": [],
+    "total": 0
+  },
+  "complexity": {
+    "averageFileSize": 237.0354200988468,
+    "maxFileSize": 455396.5568,
+    "nestedDepth": 0,
+    "estimatedComplexity": "very high"
+  },
+  "gitRepo": {
+    "firstCommitDate": "2026-04-06",
+    "totalCommits": 35141,
+    "numContributors": 0,
+    "currentBranch": "master",
+    "remoteUrls": [
+      "https://github.com/Div733/mx-chain-go.git"
+    ]
+  },
+  "license": "MIT"
+}
